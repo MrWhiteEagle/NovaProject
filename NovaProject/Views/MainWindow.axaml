@@ -1,0 +1,208 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NovaProject.ViewModels"
+        xmlns:cc="using:NovaProject.CustomControls"
+        xmlns:ia="using:Avalonia.Xaml.Interactions.Animated"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="NovaProject.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="NovaProject"
+        Background="#111111">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <SplitView
+        DisplayMode="CompactInline"
+        IsPaneOpen="{Binding IsPaneOpen}"
+        CompactPaneLength="60">
+        <SplitView.Pane>
+            <StackPanel Spacing="5" Background="#111111">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="60">
+                    <TabStrip
+                        IsVisible="{Binding IsPaneOpen}"
+                        HorizontalAlignment="Left">
+                        <TabStripItem Width="72">
+                            <Border
+                                Classes="TabMenuIconButton">
+                                <PathIcon Data="{StaticResource ChatRegular}"></PathIcon>
+                            </Border>
+                        </TabStripItem>
+                        <TabStripItem Width="72">
+                            <Border
+                                Classes="TabMenuIconButton">
+                                <PathIcon Data="{StaticResource GlobeRegular}"></PathIcon>
+                            </Border>
+                        </TabStripItem>
+                    </TabStrip>
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding OpenPaneCommand}"
+                        Classes="PaneOpenButton">
+                        <PathIcon
+                            Data="{StaticResource ArrowRightRegular}">
+                        </PathIcon>
+                    </Button>
+                </Grid>
+                <ScrollViewer
+                    Background="Transparent">
+                    <ItemsControl ItemsSource="{Binding UserList}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border
+                                    Classes="UserTile">
+                                    <Grid
+                                        ColumnDefinitions="60, *"
+                                        RowDefinitions="48">
+                                        <Border
+                                                Width="36"
+                                                Height="36"
+                                                CornerRadius="30"
+                                                BorderBrush="#999999"
+                                                BorderThickness="1"
+                                                HorizontalAlignment="Center">
+                                            <PathIcon
+                                                Data="{StaticResource PersonRegular}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Foreground="#999999">
+                                            </PathIcon>
+                                        </Border>
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Stretch"
+                                            Text="{Binding Username}"
+                                            Foreground="#999999">
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+        </SplitView.Pane>
+        <SplitView.Content>
+            <Border
+                CornerRadius="10,0,0,10"
+                Background="#1e1e1e">
+                <Grid RowDefinitions="72, *, Auto">
+                    <Border
+                        x:Name="ChatTitle"
+                        Classes="ChatTitleBar">
+                        <Grid
+                            Margin="3"
+                            ColumnDefinitions="48, *, 48, 48, 48"
+                            RowDefinitions="*">
+                            <PathIcon Data="{StaticResource PersonRegular}" Foreground="White"></PathIcon>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Stretch"
+                                Foreground="White"
+                                TextAlignment="Left">
+                                DEFAULT USER
+                            </TextBlock>
+                            <Border
+                                Grid.Column="2"
+                                Classes="ToolBarIconButtonEmphasized">
+                                <PathIcon
+                                    Data="{StaticResource CallOutboundRegular}">
+                                </PathIcon>
+                            </Border>
+                            <Border
+                                Grid.Column="3"
+                                Classes="ToolBarIconButtonEmphasized">
+                                <PathIcon
+                                    Data="{StaticResource SearchRegular}">
+                                </PathIcon>
+                            </Border>
+                            <Border
+                                Grid.Column="4"
+                                Classes="ToolBarIconButtonEmphasized">
+                                <PathIcon
+                                    Data="{StaticResource MoreRegular}">
+                                </PathIcon>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <ScrollViewer
+                        x:Name="ChatBody"
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        Classes="ChatBody">
+                        <Interaction.Behaviors>
+                            <ia:VerticalScrollViewerAnimatedBehavior></ia:VerticalScrollViewerAnimatedBehavior>
+                        </Interaction.Behaviors>
+                        <StackPanel>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <cc:ChatBubble></cc:ChatBubble>
+                            <Panel Height="60"></Panel>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Border
+                        x:Name="ChatField"
+                        Grid.Row="2"
+                        Classes="ChatTitleBar">
+                        <Grid ColumnDefinitions="*, 48, 48, 48">
+                            <TextBox
+                                Classes="MessageInput"
+                                Watermark="Message...">
+                            </TextBox>
+                            <Border
+                                Grid.Column="1"
+                                Classes="ToolBarIconButton">
+                                <PathIcon
+                                    Data="{StaticResource AttachRegular}">
+                                </PathIcon>
+                            </Border>
+                            <Border
+                                Grid.Column="2"
+                                Classes="ToolBarIconButton">
+                                <PathIcon
+                                    Data="{StaticResource EmojiLaughRegular}">
+                                </PathIcon>
+                            </Border>
+                            <Border
+                                Grid.Column="3"
+                                Classes="ToolBarIconButtonEmphasized">
+                                <PathIcon
+                                    Data="{StaticResource SendRegular}">
+                                </PathIcon>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </SplitView.Content>
+    </SplitView>
+
+</Window>
