@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:NovaProject.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NovaProject.CustomControls.UserList"
+             x:DataType="vm:UserListViewModel">
+    <ScrollViewer
+        Background="Transparent">
+        <ItemsControl ItemsSource="{Binding UserConversations}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        Classes="UserTile">
+                        <Grid
+                            ColumnDefinitions="60, *"
+                            RowDefinitions="48">
+                            <Border
+                                Width="36"
+                                Height="36"
+                                CornerRadius="30"
+                                BorderBrush="#999999"
+                                BorderThickness="1"
+                                HorizontalAlignment="Center">
+                                <PathIcon
+                                    Data="{StaticResource PersonRegular}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Foreground="#999999">
+                                </PathIcon>
+                            </Border>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Stretch"
+                                Text="{Binding Username}"
+                                Foreground="#999999">
+                            </TextBlock>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

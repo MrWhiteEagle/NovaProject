@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ccvm="clr-namespace:NovaProject.CustomControls.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NovaProject.CustomControls.ChatInput"
+             x:DataType="ccvm:ChatInputViewModel">
+    <Border
+        x:Name="ChatField"
+        Classes="ChatTitleBar">
+        <Grid ColumnDefinitions="*, 48, 48, 48">
+            <TextBox
+                Classes="MessageInput"
+                Watermark="Message..."
+                x:Name="ChatInputBox"
+                >
+                <TextBox.KeyBindings>
+                    <KeyBinding Command="{Binding SendMessage}">
+                    </KeyBinding>
+                </TextBox.KeyBindings>
+            </TextBox>
+            <Border
+                Grid.Column="1"
+                Classes="ToolBarIconButton">
+                <PathIcon
+                    Data="{StaticResource AttachRegular}">
+                </PathIcon>
+            </Border>
+            <Border
+                Grid.Column="2"
+                Classes="ToolBarIconButton">
+                <PathIcon
+                    Data="{StaticResource EmojiLaughRegular}">
+                </PathIcon>
+            </Border>
+            <Border
+                Grid.Column="3"
+                Classes="ToolBarIconButtonEmphasized"
+                PointerPressed="InputElement_OnPointerPressed">
+                <PathIcon
+                    Data="{StaticResource SendRegular}">
+                </PathIcon>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

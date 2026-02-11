@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="NovaProject.CustomControls.ChatTitlebar">
+    <Border
+        x:Name="ChatTitle"
+        Classes="ChatTitleBar">
+        <Grid
+            Margin="3"
+            ColumnDefinitions="48, *, 48, 48, 48"
+            RowDefinitions="*">
+            <PathIcon Data="{StaticResource PersonRegular}" Foreground="White"></PathIcon>
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Stretch"
+                Foreground="White"
+                TextAlignment="Left">
+                DEFAULT USER
+            </TextBlock>
+            <Border
+                Grid.Column="2"
+                Classes="ToolBarIconButtonEmphasized">
+                <PathIcon
+                    Data="{StaticResource CallOutboundRegular}">
+                </PathIcon>
+            </Border>
+            <Border
+                Grid.Column="3"
+                Classes="ToolBarIconButtonEmphasized">
+                <PathIcon
+                    Data="{StaticResource SearchRegular}">
+                </PathIcon>
+            </Border>
+            <Border
+                Grid.Column="4"
+                Classes="ToolBarIconButtonEmphasized">
+                <PathIcon
+                    Data="{StaticResource MoreRegular}">
+                </PathIcon>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

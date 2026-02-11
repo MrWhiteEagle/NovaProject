@@ -2,14 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="clr-namespace:NovaProject.CustomControls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NovaProject.CustomControls.ChatBubble">
+             x:Class="NovaProject.CustomControls.ChatBubble"
+             x:DataType="cc:ChatBubble">
     <Border
         x:Name="MessageBody"
         Classes="ChatBubbleSelf">
-        <TextBlock
-            x:Name="MessageContent">
-            A sample message, How are you doing?
-        </TextBlock>
+        <TextBlock x:Name="MessageBlock" Text="{Binding $parent[cc:ChatBubble].MessageContent}"/>
     </Border>
 </UserControl>

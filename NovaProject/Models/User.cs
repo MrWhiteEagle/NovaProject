@@ -1,14 +1,7 @@
 namespace NovaProject.Models;
 
-public class User
+public class User(string uname, string tag)
 {
-    public string Username { get; set; }
-    public string Tag { get; set; }
-
-    public User(string uname, string tag)
-    {
-        this.Username = uname;
-        this.Tag = tag;
-    }
-    
+    public string Username { get; set; } = uname;
+    public string Tag { get; set; } = tag;
 }
