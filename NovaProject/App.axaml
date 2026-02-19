@@ -10,7 +10,16 @@
     </Application.DataTemplates>
   
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme></FluentTheme>
         <StyleInclude Source="avares://NovaProject/Assets/Styles.axaml"></StyleInclude>
     </Application.Styles>
+             
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://NovaProject/Assets/Colors.axaml"></ResourceInclude>
+                <ResourceInclude Source="avares://NovaProject/Assets/Icons.axaml"></ResourceInclude>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

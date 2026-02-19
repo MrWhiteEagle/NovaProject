@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="Primary">#d70055</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentPrimary">#1e1e1e</SolidColorBrush>
+    <SolidColorBrush x:Key="AccentPrimaryDark">#111111</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray100">#999999</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray200">#888888</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray300">#777777</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray400">#666666</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray500">#555555</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray600">#444444</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray700">#333333</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray800">#222222</SolidColorBrush>
+    <SolidColorBrush x:Key="Gray900">#111111</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray1">#111111</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray2">#1a1a1a</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray3">#1e1e1e</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray4">#222222</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray5">#2a2a2a</SolidColorBrush>
+    <SolidColorBrush x:Key="DarkGray6">#3a3a3a</SolidColorBrush>
+</ResourceDictionary>

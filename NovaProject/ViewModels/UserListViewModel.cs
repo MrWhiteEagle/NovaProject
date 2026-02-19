@@ -1,22 +1,42 @@
+using System;
 using System.Collections.ObjectModel;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Media;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using NovaProject.Models;
 
 namespace NovaProject.ViewModels;
 
-public partial class UserListViewModel : ViewModelBase
+public partial class UserListViewModel(string tabIconName) : ViewModelBase
 {
+    public string TabIconName { get; set; } = tabIconName;
+    public string DebugId { get; set; } = Guid.NewGuid().ToString();
     
-    public static ObservableCollection<User> UserConversations { get; set; } =
-    [
-        new User("SAMPLE_USER_001", "1111"),
-        new User("SAMPLE_USER_002", "2222"),
-        new User("SAMPLE_USER_003", "3333"),
-        new User("SAMPLE_USER_004", "4444"),
-        new User("SAMPLE_USER_005", "5555"),
-        new User("SAMPLE_USER_006", "6666"),
-        new User("SAMPLE_USER_007", "7777"),
-        new User("SAMPLE_USER_008", "8888"),
-        new User("SAMPLE_USER_009", "9999"),
-        new User("SAMPLE_USER_010", "1010"),
-    ];
+    [RelayCommand]
+    private void OpenConversationRequest(User user)
+    {
+        Console.WriteLine("Conversation Request for User: "+ user.DisplayName);
+    }
+
+    public ObservableCollection<UserListDisplayItem> DisplayItemList { get; } = [];
+    
+    public void AddDataToList(UserListDisplayItem item)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            DisplayItemList.Add(item);
+            Console.WriteLine("Added Item to list with id: "+ DebugId + item.DisplayName);
+        });
+    }
+
+    public void RemoveDataFromList(UserListDisplayItem item)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            DisplayItemList.Remove(item);
+        });
+    }
 }

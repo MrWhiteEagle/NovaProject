@@ -1,7 +1,6 @@
 namespace NovaProject.Models;
 
-public class User(string uname, string tag)
+public class User(string name, string displayName, string tag) : UserListDisplayItem(name, displayName)
 {
-    public string Username { get; set; } = uname;
     public string Tag { get; set; } = tag;
 }

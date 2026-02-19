@@ -11,10 +11,6 @@
         Title="NovaProject"
         Background="#111111">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>
-
     <SplitView
         DisplayMode="CompactInline"
         IsPaneOpen="{Binding IsPaneOpen}"
@@ -24,30 +20,54 @@
                 <Grid ColumnDefinitions="Auto,*" RowDefinitions="60">
                     <TabStrip
                         IsVisible="{Binding IsPaneOpen}"
-                        HorizontalAlignment="Left">
-                        <TabStripItem Width="72">
-                            <Border
-                                Classes="TabMenuIconButton">
-                                <PathIcon Data="{StaticResource ChatRegular}"></PathIcon>
-                            </Border>
+                        HorizontalAlignment="Left"
+                        ItemsSource="{Binding Tabs}"
+                        SelectedIndex="{Binding CurrentTabIndex}">
+                        <TabStripItem
+                            Classes="PaneMenuItem">
+                            <PathIcon Data="{DynamicResource ChatRegular}">
+                            </PathIcon>
                         </TabStripItem>
-                        <TabStripItem Width="72">
-                            <Border
-                                Classes="TabMenuIconButton">
-                                <PathIcon Data="{StaticResource GlobeRegular}"></PathIcon>
-                            </Border>
+                        <TabStripItem
+                            Classes="PaneMenuItem">
+                            <PathIcon Data="{DynamicResource GlobeRegular}"></PathIcon>
                         </TabStripItem>
+                        
                     </TabStrip>
                     <Button
                         Grid.Column="1"
                         Command="{Binding OpenPaneCommand}"
-                        Classes="PaneOpenButton">
+                        Classes="PaneOpenButton"
+                        Classes.expanded="{Binding IsPaneOpen}">
                         <PathIcon
-                            Data="{StaticResource ArrowRightRegular}">
+                            Data="{DynamicResource ArrowRightRegular}">
                         </PathIcon>
                     </Button>
                 </Grid>
-                <cc:UserList/>
+                <Border>
+                    <StackPanel
+                        Orientation="Horizontal"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Right"
+                        Margin="15"
+                        IsVisible="{Binding IsPaneOpen}">
+                        <Button
+                            Classes="SimpleTextButton"
+                            Foreground="WhiteSmoke"
+                            FontWeight="Bold">
+                            Add new +
+                        </Button>
+                    </StackPanel>
+                </Border>
+                <ContentControl Content="{Binding CurrentTab}">
+                    <ContentControl.DataTemplates>
+                        <DataTemplate DataType="vm:UserListViewModel">
+                            <cc:UserList>
+
+                            </cc:UserList>
+                        </DataTemplate>
+                    </ContentControl.DataTemplates>
+                </ContentControl>
             </StackPanel>
         </SplitView.Pane>
         <SplitView.Content>
