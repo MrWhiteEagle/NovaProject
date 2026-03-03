@@ -15,7 +15,18 @@
     <SolidColorBrush x:Key="DarkGray1">#111111</SolidColorBrush>
     <SolidColorBrush x:Key="DarkGray2">#1a1a1a</SolidColorBrush>
     <SolidColorBrush x:Key="DarkGray3">#1e1e1e</SolidColorBrush>
+    <Color x:Key="DarkGray3Color">#1e1e1e</Color>
+    <Color x:Key="DarkGray2Color">#1a1a1a</Color>
     <SolidColorBrush x:Key="DarkGray4">#222222</SolidColorBrush>
     <SolidColorBrush x:Key="DarkGray5">#2a2a2a</SolidColorBrush>
     <SolidColorBrush x:Key="DarkGray6">#3a3a3a</SolidColorBrush>
+    <SolidColorBrush x:Key="MainGreen">#30C208</SolidColorBrush>
+    <SolidColorBrush x:Key="MainRed">#C40000</SolidColorBrush>
+    <SolidColorBrush x:Key="MainYellow">#F0D500</SolidColorBrush>
+    <SolidColorBrush x:Key="MainBlue">#0094F0</SolidColorBrush>
+    
+    <LinearGradientBrush x:Key="ChatBodyBackgroundGradient" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="{DynamicResource DarkGray2Color}" Offset="0.0"></GradientStop>
+        <GradientStop Color="{DynamicResource DarkGray3Color}" Offset="1.0"></GradientStop>
+    </LinearGradientBrush>
 </ResourceDictionary>

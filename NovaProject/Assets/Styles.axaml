@@ -221,7 +221,7 @@
                     Width="{TemplateBinding Width}"
                     Height="{TemplateBinding Height}"
                     Margin="{TemplateBinding Margin}"
-                    Background="Transparent">
+                    Background="{DynamicResource Gray900}">
                     <ContentPresenter
                         x:Name="PART_ContentPresenter"
                         HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -317,7 +317,7 @@
 
 
     <Style Selector="Border.ChatBubbleSelf">
-        <Setter Property="Background" Value="{DynamicResource PrimaryDark}" />
+        <Setter Property="Background" Value="{DynamicResource Gray700}" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="CornerRadius" Value="15" />
         <Style Selector="^ TextBlock">
@@ -337,11 +337,21 @@
             <Setter Property="FontSize" Value="14" />
         </Style>
     </Style>
+    
+    <Style Selector="Grid.ChatBubbleSelfGrid">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.3" Easing="QuarticEaseOut"></BrushTransition>
+            </Transitions>
+        </Setter>
+    </Style>
 
     <Style Selector="Border.UserTile">
-        <Setter Property="Background" Value="{DynamicResource DarkGray1}" />
+        <Setter Property="Background" Value="{DynamicResource Gray900}" />
         <Setter Property="Padding" Value="0,3,3,0" />
-        <Setter Property="Margin" Value="0,3,0,3" />
+        <Setter Property="Margin" Value="0,2,2,0" />
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Transitions">
@@ -350,7 +360,7 @@
             </Transitions>
         </Setter>
         <Style Selector="^:pointerover">
-            <Setter Property="Background" Value="{DynamicResource DarkGray2}" />
+            <Setter Property="Background" Value="{DynamicResource Gray700}" />
         </Style>
 
         <Style Selector="^ > Grid">

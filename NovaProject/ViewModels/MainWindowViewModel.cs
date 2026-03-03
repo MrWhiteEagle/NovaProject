@@ -23,11 +23,18 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Console.WriteLine("New main window with id:" + DebugId);
     }
+    
     public ChatInputViewModel Input { get; set; } = new();
     public ChatBodyViewModel Body { get; set; } = new();
+    
+    //Server-Private Tabs
     public ObservableCollection<UserListViewModel> Tabs { get; } = new();
     [ObservableProperty] private int _currentTabIndex;
     [ObservableProperty] private UserListViewModel _currentTab;
+
+    public ObservableCollection<ChatBodyViewModel> Chats { get; } = new();
+    [ObservableProperty] private User _currentOpenUser;
+    [ObservableProperty] private ChatBodyViewModel _currentChat;
 
     partial void OnCurrentTabIndexChanged(int value)
     {
@@ -80,9 +87,12 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             Tabs[0].AddDataToList(item);
         }
-
+        
         CurrentTabIndex = 0;
         CurrentTab = Tabs[0];
+        
+        CurrentOpenUser = _userConversations[0];
+        CurrentChat = new ChatBodyViewModel();
     }
 
     public void UpdateMessagesRequest(MessageSentEventArgs eventArgs)

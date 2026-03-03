@@ -33,7 +33,7 @@ public partial class ChatInput : UserControl
         ChatInputBox.Text = string.Empty;
     }
 
-    private void InputElement_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    private void Button_OnClick(object? sender, RoutedEventArgs e)
     {
         OnSendInternal();
     }

@@ -19,7 +19,7 @@
             <ItemsControl ItemsSource="{Binding Messages}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <cc:ChatBubble MessageContent="{Binding}"/>
+                        <cc:ChatBubble MessageContent="{Binding Content}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

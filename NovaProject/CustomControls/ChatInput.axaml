@@ -16,7 +16,9 @@
                 x:Name="ChatInputBox"
                 >
                 <TextBox.KeyBindings>
-                    <KeyBinding Command="{Binding SendMessage}">
+                    <KeyBinding 
+                        Command="{Binding SendMessage}"
+                        Gesture="Enter">
                     </KeyBinding>
                 </TextBox.KeyBindings>
             </TextBox>
@@ -37,7 +39,7 @@
             <Button
                 Grid.Column="3"
                 Classes="EmphasizedRegularIconButton"
-                PointerPressed="InputElement_OnPointerPressed">
+                Click="Button_OnClick">
                 <PathIcon
                     Data="{DynamicResource SendRegular}">
                 </PathIcon>

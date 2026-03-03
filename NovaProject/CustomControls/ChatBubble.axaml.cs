@@ -1,6 +1,7 @@
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -19,5 +20,20 @@ public partial class ChatBubble : UserControl
     {
         get => GetValue(MessageContentProperty);
         set => SetValue(MessageContentProperty, value);
+    }
+    private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
+    {
+        EditMessageButton.IsVisible = true;
+        RespondToMessageButton.IsVisible = true;
+        DeleteMessageButton.IsVisible = true;
+        MoreMessageActionsButton.IsVisible = true;
+    }
+
+    private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        EditMessageButton.IsVisible = false;
+        RespondToMessageButton.IsVisible = false;
+        DeleteMessageButton.IsVisible = false;
+        MoreMessageActionsButton.IsVisible = false;
     }
 }

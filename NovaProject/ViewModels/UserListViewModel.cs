@@ -28,7 +28,6 @@ public partial class UserListViewModel(string tabIconName) : ViewModelBase
         Dispatcher.UIThread.Post(() =>
         {
             DisplayItemList.Add(item);
-            Console.WriteLine("Added Item to list with id: "+ DebugId + item.DisplayName);
         });
     }
 

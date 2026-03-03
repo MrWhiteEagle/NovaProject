@@ -6,9 +6,48 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBubble"
              x:DataType="cc:ChatBubble">
-    <Border
-        x:Name="MessageBody"
-        Classes="ChatBubbleSelf">
-        <TextBlock x:Name="MessageBlock" Text="{Binding $parent[cc:ChatBubble].MessageContent}"/>
-    </Border>
+    <Grid
+        ColumnDefinitions="50, 50, 50, 50, *"
+        Classes="ChatBubbleSelfGrid"
+        PointerEntered="InputElement_OnPointerEntered"
+        PointerExited="InputElement_OnPointerExited">
+        <Button
+            x:Name="EditMessageButton"
+            Classes="RegularIconButton"
+            IsVisible="False">
+            <PathIcon
+                Data="{DynamicResource EditRegular}"></PathIcon>
+        </Button>
+        <Button
+            Grid.Column="1"
+            x:Name="RespondToMessageButton"
+            Classes="RegularIconButton"
+            IsVisible="False">
+            <PathIcon
+                Data="{DynamicResource ArrowReplyRegular}"></PathIcon>
+        </Button>
+        <Button
+            Grid.Column="2"
+            x:Name="DeleteMessageButton"
+            Classes="RegularIconButton"
+            IsVisible="False">
+            <PathIcon
+                Data="{DynamicResource DeleteRegular}"></PathIcon>
+        </Button>
+        <Button
+            Grid.Column="3"
+            x:Name="MoreMessageActionsButton"
+            Classes="RegularIconButton"
+            IsVisible="False">
+            <PathIcon
+                Data="{DynamicResource MoreRegular}"></PathIcon>
+        </Button>
+        <Border
+            Grid.Column="4"
+            x:Name="MessageBody"
+            Classes="ChatBubbleSelf"
+            HorizontalAlignment="Right">
+            <TextBlock x:Name="MessageBlock" Text="{Binding $parent[cc:ChatBubble].MessageContent}" />
+        </Border>
+    </Grid>
 </UserControl>

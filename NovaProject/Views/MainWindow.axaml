@@ -16,7 +16,10 @@
         IsPaneOpen="{Binding IsPaneOpen}"
         CompactPaneLength="60">
         <SplitView.Pane>
-            <StackPanel Spacing="5" Background="#111111">
+            <Grid
+                ColumnDefinitions="*"
+                RowDefinitions="Auto, Auto, *, Auto"
+                Background="{DynamicResource Gray900}">
                 <Grid ColumnDefinitions="Auto,*" RowDefinitions="60">
                     <TabStrip
                         IsVisible="{Binding IsPaneOpen}"
@@ -44,7 +47,8 @@
                         </PathIcon>
                     </Button>
                 </Grid>
-                <Border>
+                <Border
+                    Grid.Row="1">
                     <StackPanel
                         Orientation="Horizontal"
                         VerticalAlignment="Stretch"
@@ -59,7 +63,9 @@
                         </Button>
                     </StackPanel>
                 </Border>
-                <ContentControl Content="{Binding CurrentTab}">
+                <ContentControl 
+                    Content="{Binding CurrentTab}"
+                    Grid.Row="2">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="vm:UserListViewModel">
                             <cc:UserList>
@@ -68,13 +74,34 @@
                         </DataTemplate>
                     </ContentControl.DataTemplates>
                 </ContentControl>
-            </StackPanel>
+                <Border
+                    x:Name="UserProfileTile"
+                    Grid.Row="3"
+                    Cursor="Hand"
+                    Background="Transparent"
+                    Padding="0,3,0,3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    >
+                    <Grid
+                        ColumnDefinitions="60, *"
+                        RowDefinitions="48">
+                        <cc:UserIconImage></cc:UserIconImage>
+                        <TextBlock
+                            Grid.Column="1"
+                            VerticalAlignment="Center">
+                            CURRENT_USER
+                        </TextBlock>
+                    </Grid>
+                </Border>
+            </Grid>
         </SplitView.Pane>
         <SplitView.Content>
             <Border
                 CornerRadius="10,0,0,10"
-                Background="#1e1e1e">
-                <Grid RowDefinitions="72, *, Auto">
+                Background="{DynamicResource ChatBodyBackgroundGradient}"
+                >
+                <Grid RowDefinitions="100, *, Auto">
                     <cc:ChatTitlebar
                         x:Name="ChatTitle"
                         ZIndex="1">
