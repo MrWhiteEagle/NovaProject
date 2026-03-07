@@ -3,21 +3,21 @@ using Avalonia.Interactivity;
 
 namespace NovaProject.Models.Events;
 
-public partial class MessageSentEventArgs : RoutedEventArgs
+public class MessageReceivedEventArgs : RoutedEventArgs
 {
     public string Message { get;}
-    public User? Recipient { get;}
-    public DateTime SentAt { get;}
+    public User? Sender { get;}
+    public DateTime SentAt { get; }
 
-    public MessageSentEventArgs(string message)
+    public MessageReceivedEventArgs(string message)
     {
         this.Message = message;
         this.SentAt = DateTime.Now;
     }
-    public MessageSentEventArgs(string message, User recipient)
+    public MessageReceivedEventArgs(string message, User sender)
     {
         Message = message;
-        Recipient = recipient;
+        Sender = sender;
         this.SentAt = DateTime.Now;
     }
 }

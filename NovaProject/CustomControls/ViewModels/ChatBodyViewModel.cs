@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using NovaProject.Models;
 using NovaProject.Models.Events;
@@ -12,10 +11,6 @@ public class ChatBodyViewModel : ViewModelBase
     private User? _recipient;
 
     public ObservableCollection<MessageIo> Messages { get; set; } = new();
-    public ChatBodyViewModel()
-    {
-        
-    }
 
     public void UpdateMessageList(MessageSentEventArgs e)
     {
@@ -30,5 +25,20 @@ public class ChatBodyViewModel : ViewModelBase
                     "placeholder_recipient",
                     "placeholder_recipient",
                     "2222")));
+    }
+
+    public void UpdateMessageList(MessageReceivedEventArgs e)
+    {
+        Messages.Add(
+            new MessageOutbound(
+                e.Message,
+                new User(
+                    "PlaceholderSender",
+                    "placeholder_sender",
+                    "2222"),
+                new User(
+                    "PlaceHolderRecipient",
+                    "placeholder_recipient",
+                    "3333")));
     }
 }

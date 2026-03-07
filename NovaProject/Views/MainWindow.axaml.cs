@@ -1,6 +1,4 @@
 using System;
-using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NovaProject.CustomControls;
@@ -11,23 +9,40 @@ namespace NovaProject.Views;
 
 public partial class MainWindow : Window
 {
-    MainWindowViewModel vm;
+    private readonly MainWindowViewModel _vm;
     public MainWindow()
     {
         InitializeComponent();
-        vm = new MainWindowViewModel();
-        DataContext = vm;
+        _vm = new MainWindowViewModel();
+        DataContext = _vm;
         this.Loaded += MainWindow_OnLoaded;
+        AddHandler(UserList.OpenConversationEvent, OnOpenConversationRequest, RoutingStrategies.Bubble);
+        AddHandler(UserList.OpenServerEvent, OnOpenServerRequest, RoutingStrategies.Bubble);
     }
 
     private void MainWindow_OnLoaded(object? sender, RoutedEventArgs e)
     {
         Console.WriteLine("MainWindow_OnLoaded");
-        vm.SetupTabs();
+        _vm.SetupTabs();
     }
 
     private void ChatField_OnMessageSent(object? sender, MessageSentEventArgs e)
     {
-        vm.UpdateMessagesRequest(e);
+        _vm.UpdateMessagesRequest(e);
+    }
+
+    private void ChatField_OnMessageReceived(object? sender, MessageReceivedEventArgs e)
+    {
+        _vm.UpdateMessagesRequest(e);
+    }
+
+    private void OnOpenConversationRequest(object? sender, OpenConversationEventArgs e)
+    {
+        _vm.OpenConversationRequest(e);
+    }
+
+    private void OnOpenServerRequest(object? sender, OpenServerEventArgs e)
+    {
+        _vm.OpenServerRequest(e);
     }
 }

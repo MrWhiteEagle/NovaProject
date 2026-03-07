@@ -3,17 +3,17 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace NovaProject.CustomControls;
 
-public partial class ChatBubble : UserControl
+public partial class ChatBubbleOther : UserControl
 {
     public static readonly StyledProperty<string> MessageContentProperty = 
         AvaloniaProperty.Register<ChatBubble, string>(nameof(MessageContent));
+
     public static readonly StyledProperty<DateTime> SentAtProperty =
         AvaloniaProperty.Register<ChatBubble, DateTime>(nameof(SentAt));
-    public ChatBubble()
+    public ChatBubbleOther()
     {
         InitializeComponent();
     }
@@ -23,6 +23,7 @@ public partial class ChatBubble : UserControl
         get => GetValue(MessageContentProperty);
         set => SetValue(MessageContentProperty, value);
     }
+
     public DateTime SentAt
     {
         get => GetValue(SentAtProperty);

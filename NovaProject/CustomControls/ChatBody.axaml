@@ -2,9 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:ia="using:Avalonia.Xaml.Interactions.Animated"
              xmlns:cc="using:NovaProject.CustomControls"
              xmlns:ccvm="using:NovaProject.CustomControls.ViewModels"
+             xmlns:m="using:NovaProject.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBody"
              x:DataType="ccvm:ChatBodyViewModel">
@@ -17,10 +17,15 @@
         <StackPanel
             x:Name="MessageList">
             <ItemsControl ItemsSource="{Binding Messages}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <cc:ChatBubble MessageContent="{Binding Content}"/>
+                <ItemsControl.DataTemplates>
+                    <DataTemplate DataType="{x:Type m:MessageInbound}">
+                        <cc:ChatBubble MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
                     </DataTemplate>
+                    <DataTemplate DataType="{x:Type m:MessageOutbound}">
+                        <cc:ChatBubbleOther MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
+                    </DataTemplate>
+                </ItemsControl.DataTemplates>
+                <ItemsControl.ItemTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Panel Height="60"></Panel>

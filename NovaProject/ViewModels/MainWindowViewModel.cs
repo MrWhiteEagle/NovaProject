@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Net.Mime;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Interactivity;
-using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using NovaProject.CustomControls;
 using NovaProject.CustomControls.ViewModels;
 using NovaProject.Models;
 using NovaProject.Models.Events;
@@ -18,10 +11,10 @@ namespace NovaProject.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public string DebugId = Guid.NewGuid().ToString();
+    private readonly string _debugId = Guid.NewGuid().ToString();
     public MainWindowViewModel()
     {
-        Console.WriteLine("New main window with id:" + DebugId);
+        Console.WriteLine("New main window with id:" + _debugId);
     }
     
     public ChatInputViewModel Input { get; set; } = new();
@@ -35,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public ObservableCollection<ChatBodyViewModel> Chats { get; } = new();
     [ObservableProperty] private User _currentOpenUser;
     [ObservableProperty] private ChatBodyViewModel _currentChat;
+    [ObservableProperty] private ChatTitlebarViewModel _currentTitlebar;
 
     partial void OnCurrentTabIndexChanged(int value)
     {
@@ -67,7 +61,7 @@ public partial class MainWindowViewModel : ViewModelBase
         new ServerData("server8", "Example_Server_008", "8888", "8888"),
     ];
     
-    [ObservableProperty] private bool _isPaneOpen = false;
+    [ObservableProperty] private bool _isPaneOpen;
 
     [RelayCommand]
     private void OpenPane()
@@ -98,6 +92,29 @@ public partial class MainWindowViewModel : ViewModelBase
     public void UpdateMessagesRequest(MessageSentEventArgs eventArgs)
     {
         Body.UpdateMessageList(eventArgs);
+    }
+
+    public void UpdateMessagesRequest(MessageReceivedEventArgs eventArgs)
+    {
+        Body.UpdateMessageList(eventArgs);
+    }
+
+    public void OpenConversationRequest(OpenConversationEventArgs eventArgs)
+    {
+        Console.WriteLine("Got request to open conversation with user: " + eventArgs.SelectedUserItem.DisplayName);
+        GetConversationData(eventArgs.SelectedUserItem);
+    }
+
+    public void OpenServerRequest(OpenServerEventArgs eventArgs)
+    {
+        Console.WriteLine("Got request to open server: " + eventArgs.SelectedServerData.DisplayName);
+        GetConversationData(eventArgs.SelectedServerData);
+    }
+
+    private void GetConversationData(UserListDisplayItem item)
+    {
+        //Implement data fetch
+        Console.WriteLine(item.Name);
     }
 
 

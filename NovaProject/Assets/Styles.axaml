@@ -320,10 +320,12 @@
         <Setter Property="Background" Value="{DynamicResource Gray700}" />
         <Setter Property="HorizontalAlignment" Value="Right" />
         <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="MaxWidth" Value="300"/>
         <Style Selector="^ TextBlock">
             <Setter Property="Margin" Value="20,10,20,12" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </Style>
 
@@ -331,14 +333,25 @@
         <Setter Property="Background" Value="{DynamicResource Gray800}" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="CornerRadius" Value="15" />
+        <Setter Property="MaxWidth" Value="300"/>
         <Style Selector="^ TextBlock">
             <Setter Property="Margin" Value="20,10,20,12" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </Style>
     
     <Style Selector="Grid.ChatBubbleSelfGrid">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.3" Easing="QuarticEaseOut"></BrushTransition>
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Grid.ChatBubbleOtherGrid">
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Transitions">
@@ -377,10 +390,10 @@
             </Setter>
         </Style>
         <Style Selector="^:pointerover > Grid">
-            <Setter Property="RenderTransform" Value="scale(1.02)" />
+            <Setter Property="RenderTransform" Value="scale(1.02) translateX(5px)" />
         </Style>
         <Style Selector="^.pressed > Grid">
-            <Setter Property="RenderTransform" Value="scale(0.95) translate(5px,0px)" />
+            <Setter Property="RenderTransform" Value="scale(0.98)" />
         </Style>
     </Style>
 

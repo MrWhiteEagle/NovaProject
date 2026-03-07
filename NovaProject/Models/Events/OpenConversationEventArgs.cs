@@ -1,0 +1,11 @@
+using Avalonia.Interactivity;
+
+namespace NovaProject.Models.Events;
+
+public class OpenConversationEventArgs : RoutedEventArgs
+{
+    public User SelectedUserItem { get; set; }
+
+    public OpenConversationEventArgs(RoutedEvent routedEvent, User selectedUserItem) :
+        base(routedEvent) => SelectedUserItem = selectedUserItem;
+}
