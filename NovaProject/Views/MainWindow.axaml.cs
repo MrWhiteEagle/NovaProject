@@ -1,4 +1,3 @@
-using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using NovaProject.CustomControls;
@@ -10,23 +9,36 @@ namespace NovaProject.Views;
 public partial class MainWindow : Window
 {
     private readonly MainWindowViewModel _vm;
+    public bool IsReallyClosing = false;
     public MainWindow()
     {
         InitializeComponent();
         _vm = new MainWindowViewModel();
         DataContext = _vm;
         this.Loaded += MainWindow_OnLoaded;
+        this.Closing += MainWindow_OnClose;
         AddHandler(UserList.OpenConversationEvent, OnOpenConversationRequest, RoutingStrategies.Bubble);
         AddHandler(UserList.OpenServerEvent, OnOpenServerRequest, RoutingStrategies.Bubble);
         AddHandler(ChatTitlebar.CallRequestEvent, OnCallOutboundRequest, RoutingStrategies.Bubble);
     }
 
+    #region Events
     private void MainWindow_OnLoaded(object? sender, RoutedEventArgs e)
     {
-        Console.WriteLine("MainWindow_OnLoaded");
         _vm.SetupTabs();
+        _vm.SetupInitialChatView();
     }
 
+    private void MainWindow_OnClose(object? sender, WindowClosingEventArgs e)
+    {
+        if (IsReallyClosing) return;
+        e.Cancel = true;
+        this.Hide();
+        this.WindowState = WindowState.Minimized;
+    }
+    #endregion
+
+    #region InterceptEventCommunication
     private void ChatField_OnMessageSent(object? sender, MessageSentEventArgs e)
     {
         _vm.UpdateMessagesRequest(e);
@@ -51,4 +63,5 @@ public partial class MainWindow : Window
     {
         _vm.OpenServerRequest(e);
     }
+    #endregion
 }

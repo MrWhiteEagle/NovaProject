@@ -3,17 +3,17 @@
              x:Class="NovaProject.App"
              xmlns:local="using:NovaProject"
              RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
-        <local:ViewLocator/>
+        <local:ViewLocator />
     </Application.DataTemplates>
-  
+
     <Application.Styles>
         <FluentTheme></FluentTheme>
         <StyleInclude Source="avares://NovaProject/Assets/Styles.axaml"></StyleInclude>
     </Application.Styles>
-             
+
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -22,4 +22,24 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="/Assets/avalonia-logo.ico"
+                      ToolTipText="NovaProject">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="Open App"
+                                        Click="TrayMenu_OpenApp">
+                        </NativeMenuItem>
+                        <NativeMenuItem Header="Minimize to tray"
+                                        Click="TrayMenu_MinimizeApp"></NativeMenuItem>
+                        <NativeMenuItem Header="Shut down"
+                                        Click="TrayMenu_CloseApp"></NativeMenuItem>
+                        
+                    </NativeMenu>
+                </TrayIcon.Menu>
+
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
 </Application>

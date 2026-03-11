@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DesktopNotifications;
 using DesktopNotifications.FreeDesktop;
 using DesktopNotifications.Windows;
@@ -37,9 +38,9 @@ public class NotificationService
     {
         try
         {
-            await _notificationManager.ShowNotification(notification);
+            await _notificationManager.ShowNotification(notification, DateTimeOffset.Now.AddSeconds(AppGlobalService.MessageNotificationTime));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
@@ -47,16 +48,23 @@ public class NotificationService
 
     public async void ShowNotification(string title, string message)
     {
+        var notification = new Notification
+        {
+            Title = title,
+            Body = message,
+        };
         try
         {
-            await _notificationManager.ShowNotification(new Notification
+            await _notificationManager.ShowNotification(
+                new Notification
             {
                 Title = title,
                 Body = message,
-            });
+            }, 
+                expirationTime: DateTimeOffset.Now.AddSeconds(AppGlobalService.MessageNotificationTime));
 
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }

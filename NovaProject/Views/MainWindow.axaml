@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:NovaProject.ViewModels"
+        xmlns:cvm="using:NovaProject.CustomControls.ViewModels"
         xmlns:cc="using:NovaProject.CustomControls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -89,8 +90,8 @@
                         <cc:UserIconImage></cc:UserIconImage>
                         <TextBlock
                             Grid.Column="1"
-                            VerticalAlignment="Center">
-                            CURRENT_USER
+                            VerticalAlignment="Center"
+                            Text="{Binding ThisUser.DisplayName}">
                         </TextBlock>
                     </Grid>
                 </Border>
@@ -107,6 +108,17 @@
                         DataContext="{Binding Titlebar}"
                         ZIndex="1">
                     </cc:ChatTitlebar>
+                    <ContentControl
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        ZIndex="0"
+                        Content="{Binding Body}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="{x:Type cvm:ChatBodyViewModel}">
+                                <cc:ChatBody></cc:ChatBody>
+                            </DataTemplate>
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
                     <cc:ChatBody
                         x:Name="ChatBody"
                         Grid.Row="0"

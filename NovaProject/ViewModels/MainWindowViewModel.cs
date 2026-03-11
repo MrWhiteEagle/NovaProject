@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NovaProject.CustomControls.ViewModels;
@@ -14,15 +15,22 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private NotificationService _notificationService;
     private readonly string _debugId = Guid.NewGuid().ToString();
+    [ObservableProperty] private User _thisUser;
+
     public MainWindowViewModel()
     {
         Console.WriteLine("New main window with id:" + _debugId);
         _notificationService = new NotificationService();
+        AppGlobalService.SetCurrentUser(new User(
+            "mrwhiteeagle",
+            "MrWhiteEagle",
+            "2137"));
+        ThisUser = AppGlobalService.CurrentUser;
     }
-    
+
     public ChatInputViewModel Input { get; set; } = new();
-    public ChatBodyViewModel Body { get; set; } = new();
-    public ChatTitlebarViewModel Titlebar { get; set; } = new();
+    [ObservableProperty] private ChatBodyViewModel _body;
+    [ObservableProperty] private ChatTitlebarViewModel _titlebar;
     
     //Server-Private Tabs
     public ObservableCollection<UserListViewModel> Tabs { get; } = new();
@@ -86,8 +94,15 @@ public partial class MainWindowViewModel : ViewModelBase
         
         CurrentTabIndex = 0;
         CurrentTab = Tabs[0];
-        
         CurrentOpenUser = _userConversations[0];
+    }
+
+    public void SetupInitialChatView()
+    {
+        Body = new ChatBodyViewModel();
+        Body.ChangeUserContext(CurrentOpenUser);
+        Chats.Add(Body);
+        Titlebar = new ChatTitlebarViewModel();
         Titlebar.ChangeUserContext(CurrentOpenUser);
     }
 
@@ -106,9 +121,24 @@ public partial class MainWindowViewModel : ViewModelBase
     public void OpenConversationRequest(OpenConversationEventArgs eventArgs)
     {
         Console.WriteLine("Got request to open conversation with user: " + eventArgs.SelectedUserItem.DisplayName);
+        if (Chats.All(c => c.Recipient != CurrentOpenUser))
+        {
+            Chats.Add(Body);
+        }
+        
         CurrentOpenUser = eventArgs.SelectedUserItem;
+        var firstOrDefault = Chats.FirstOrDefault(c => c.Recipient == eventArgs.SelectedUserItem);
+        if(firstOrDefault != null)
+        {
+            Body = firstOrDefault;
+        }
+        else
+        {
+            Body = new ChatBodyViewModel();
+            Body.ChangeUserContext(CurrentOpenUser);
+            GetConversationData(eventArgs.SelectedUserItem);
+        }
         Titlebar.ChangeUserContext(CurrentOpenUser);
-        GetConversationData(eventArgs.SelectedUserItem);
     }
 
     public void OpenServerRequest(OpenServerEventArgs eventArgs)
