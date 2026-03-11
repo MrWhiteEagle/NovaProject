@@ -18,6 +18,7 @@ public partial class MainWindow : Window
         this.Loaded += MainWindow_OnLoaded;
         AddHandler(UserList.OpenConversationEvent, OnOpenConversationRequest, RoutingStrategies.Bubble);
         AddHandler(UserList.OpenServerEvent, OnOpenServerRequest, RoutingStrategies.Bubble);
+        AddHandler(ChatTitlebar.CallRequestEvent, OnCallOutboundRequest, RoutingStrategies.Bubble);
     }
 
     private void MainWindow_OnLoaded(object? sender, RoutedEventArgs e)
@@ -39,6 +40,11 @@ public partial class MainWindow : Window
     private void OnOpenConversationRequest(object? sender, OpenConversationEventArgs e)
     {
         _vm.OpenConversationRequest(e);
+    }
+
+    private void OnCallOutboundRequest(object? sender, CallRequestEventArgs e)
+    {
+        _vm.OpenOutboundCallRequest(e);
     }
 
     private void OnOpenServerRequest(object? sender, OpenServerEventArgs e)

@@ -1,9 +1,15 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using NovaProject.Models;
 using NovaProject.ViewModels;
 
 namespace NovaProject.CustomControls.ViewModels;
 
-public class ChatTitlebarViewModel(User context) : ViewModelBase
+public partial class ChatTitlebarViewModel : ViewModelBase
 {
-    public User UserContext { get; set; } = context;
+    [ObservableProperty] private User _userContext;
+
+    public void ChangeUserContext(User user)
+    {
+        UserContext = user;
+    }
 }

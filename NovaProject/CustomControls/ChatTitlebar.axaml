@@ -24,7 +24,8 @@
             </TextBlock>
             <Button
                 Grid.Column="2"
-                Classes="EmphasizedRegularIconButton">
+                Classes="EmphasizedRegularIconButton"
+                Click="CallButton_OnClick">
                 <PathIcon
                     Data="{DynamicResource CallOutboundRegular}">
                 </PathIcon>

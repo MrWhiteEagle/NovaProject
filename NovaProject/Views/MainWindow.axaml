@@ -104,6 +104,7 @@
                 <Grid RowDefinitions="100, *, Auto">
                     <cc:ChatTitlebar
                         x:Name="ChatTitle"
+                        DataContext="{Binding Titlebar}"
                         ZIndex="1">
                     </cc:ChatTitlebar>
                     <cc:ChatBody
