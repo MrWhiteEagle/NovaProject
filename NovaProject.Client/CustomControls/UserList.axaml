@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cc="clr-namespace:NovaProject.CustomControls"
+             xmlns:viewModels="clr-namespace:NovaProject.CustomControls.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Name="UserListRoot"
+             x:Class="NovaProject.CustomControls.UserList"
+             x:DataType="viewModels:UserListViewModel">
+    <ScrollViewer
+        Background="Transparent">
+        <ItemsControl ItemsSource="{Binding DisplayItemList}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        Classes="UserTile"
+                        PointerPressed="UserTile_PointerDown"
+                        PointerReleased="UserTile_PointerReleased">
+                        <Grid
+                            ColumnDefinitions="60, *, 30"
+                            RowDefinitions="48">
+                            <cc:UserIconImage></cc:UserIconImage>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Stretch"
+                                Text="{Binding DisplayName}"
+                                Foreground="#999999">
+                            </TextBlock>
+                            <Border 
+                                Grid.Column="2"
+                                Background="{DynamicResource Primary}"
+                                Padding="2"
+                                CornerRadius="10"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,0">
+                                <TextBlock
+                                    Foreground="White"
+                                    VerticalAlignment="Center">
+                                    1
+                                </TextBlock>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>
