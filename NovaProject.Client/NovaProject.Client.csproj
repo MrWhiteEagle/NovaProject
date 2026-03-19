@@ -7,6 +7,14 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <RootNamespace>NovaProject</RootNamespace>
     </PropertyGroup>
+    
+    <Target Name="CopyDaemon" AfterTargets="Build">
+        <ItemGroup>
+            <DaemonFiles Include="..\NovaProject.Daemon\bin\$(Configuration)\$(TargetFramework)\**\*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(DaemonFiles)"
+        DestinationFolder="$(OutputPath)\Daemon\%(RecursiveDir)" />
+    </Target>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>

@@ -1,8 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaProject.Client", "NovaProject.Client\NovaProject.Client.csproj", "{8DA11A7D-ABBF-468C-BEBA-8A782FD407F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F} = {DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaProject.Core", "NovaProject.Core\NovaProject.Core.csproj", "{434942BE-4FE4-46EE-995D-22E266E1A79E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NovaProject.Daemon", "NovaProject.Daemon\NovaProject.Daemon.csproj", "{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +23,9 @@ Global
 		{434942BE-4FE4-46EE-995D-22E266E1A79E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{434942BE-4FE4-46EE-995D-22E266E1A79E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{434942BE-4FE4-46EE-995D-22E266E1A79E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC0F0EB4-69C2-4D94-A891-D5EDCFEA124F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

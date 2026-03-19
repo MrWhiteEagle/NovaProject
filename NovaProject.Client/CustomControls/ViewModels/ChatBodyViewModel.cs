@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Services;
 using NovaProject.Models.Events;
-using NovaProject.Services;
 using NovaProject.ViewModels;
 
 namespace NovaProject.CustomControls.ViewModels;

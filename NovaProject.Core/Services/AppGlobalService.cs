@@ -1,9 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Models;
 
-namespace NovaProject.Services;
+namespace NovaProject.Core.Services;
 
 public static class AppGlobalService
 {

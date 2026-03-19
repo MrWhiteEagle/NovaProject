@@ -1,10 +1,7 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Threading.Tasks;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Models;
 
-namespace NovaProject.Services;
+namespace NovaProject.Core.Services;
 
 public class ChatManagerService
 {

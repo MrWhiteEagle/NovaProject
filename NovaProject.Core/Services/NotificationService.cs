@@ -1,11 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using DesktopNotifications;
 using DesktopNotifications.FreeDesktop;
 using DesktopNotifications.Windows;
 using INotificationManager = DesktopNotifications.INotificationManager;
 
-namespace NovaProject.Services;
+namespace NovaProject.Core.Services;
 
 public class NotificationService
 {
@@ -26,11 +24,12 @@ public class NotificationService
         }
         catch
         {
+            Logger.LogError("Initialization Failed");
             throw new Exception("There was a problem initializing the notification service.");
         }
         finally
         {
-            Console.WriteLine("The notification service has been initialized.");
+            Logger.LogInfo("The notification service has been initialized.");
         }
     }
 
@@ -42,7 +41,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Logger.LogError(ex.Message);
         }
     }
 
@@ -66,7 +65,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Logger.LogError(ex.Message);
         }
     }
 }

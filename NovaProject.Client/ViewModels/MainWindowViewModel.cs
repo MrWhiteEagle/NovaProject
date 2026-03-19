@@ -5,10 +5,10 @@ using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.ClientServices;
+using NovaProject.Core.Services;
 using NovaProject.CustomControls.ViewModels;
-using NovaProject.Models;
 using NovaProject.Models.Events;
-using NovaProject.Services;
 
 namespace NovaProject.ViewModels;
 
@@ -121,7 +121,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void OpenConversationRequest(OpenConversationEventArgs eventArgs)
     {
-        Console.WriteLine("Got request to open conversation with user: " + eventArgs.SelectedUserItem.DisplayName);
+        Logger.LogInfo("Got request to open conversation with user: " + eventArgs.SelectedUserItem.DisplayName);
         if (Chats.All(c => c.Recipient != CurrentOpenUser))
         {
             Chats.Add(Body);
@@ -144,19 +144,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public void OpenServerRequest(OpenServerEventArgs eventArgs)
     {
-        Console.WriteLine("Got request to open server: " + eventArgs.SelectedServerData.DisplayName);
+        Logger.LogInfo("Got request to open server: " + eventArgs.SelectedServerData.DisplayName);
         GetConversationData(eventArgs.SelectedServerData);
     }
 
     public void OpenOutboundCallRequest(CallRequestEventArgs eventArgs)
     {
-        Console.WriteLine("[MainWindowVM] Got Outbound Call Request for user: " + eventArgs.CallRecipient.DisplayName);
+        Logger.LogInfo("[MainWindowVM] Got Outbound Call Request for user: " + eventArgs.CallRecipient.DisplayName);
     }
 
     private void GetConversationData(UserListDisplayItem item)
     {
         //Implement data fetch
-        Console.WriteLine("Fetching data for user: " + item.Name);
+        Logger.LogInfo("Fetching data for user: " + item.Name);
     }
 
 

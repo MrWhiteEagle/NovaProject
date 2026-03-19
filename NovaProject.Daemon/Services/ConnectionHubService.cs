@@ -1,22 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
-using NovaProject.Models;
+using NovaProject.Core.Services;
 
-namespace NovaProject.Services;
-public class ConnectionHubService
+namespace NovaProject.Daemon.Services;
+public class ConnectionHubService : BackgroundService
 {
     private readonly Dictionary<string, HubConnection> _connections = new();
     private ChatManagerService _chatManagerService;
 
     public event Action<string, string, string>? MessageReceived;
 
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        Logger.LogInfo("ConnectionHub Heartbeat");
+    }
+    
+
     public async Task ConnectToServer(string url)
     {
         if (!_connections.ContainsKey(url))
         {
-            Console.WriteLine("Tried to connect to server: " + url +", But the connection is already listed");
+            Logger.LogError("Tried to connect to server: " + url +", But the connection is already listed");
             return;
         }
         var connection = new HubConnectionBuilder().WithUrl($"{url}/main").WithAutomaticReconnect().Build();
@@ -36,7 +39,7 @@ public class ConnectionHubService
         }
         else
         {
-            Console.WriteLine("Tried SendMessage to " + url + " but no connection exists");
+            Logger.LogError("Tried SendMessage to " + url + " but no connection exists");
         }
     }
     
