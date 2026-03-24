@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Text.Json;
-using NovaProject.Core.Infrastructure;
 using NovaProject.Core.Infrastructure.Daemon;
 using NovaProject.Core.Services;
 
@@ -9,7 +8,7 @@ namespace NovaProject.Daemon.Services;
 
 public class DaemonWorker : BackgroundService
 {
-    private ConcurrentQueue<DaemonServerResponse> _responseQueue { get; } = new();
+    private ConcurrentQueue<DaemonServerResponse> ResponseQueue { get; } = new();
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Logger.LogInfo("Daemon Worker listening....");
@@ -21,18 +20,16 @@ public class DaemonWorker : BackgroundService
                 //Knock knock, UI
                 await using var pipeServer = new NamedPipeServerStream("NovaProject_Pipe", PipeDirection.InOut);
                 await pipeServer.WaitForConnectionAsync(stoppingToken);
-                Logger.LogInfo("Daemon Worker waiting for connection...");
 
                 using (var reader = new StreamReader(pipeServer, leaveOpen: true))
                 {
                     var rawJson =  await reader.ReadLineAsync(stoppingToken);
                     if (!string.IsNullOrEmpty(rawJson) && !string.IsNullOrWhiteSpace(rawJson))
                     {
-                        Logger.LogInfo("Daemon Worker received: " + rawJson);
                         try
                         {
                             var request = JsonSerializer.Deserialize<DaemonServerRequest>(rawJson);
-                            await HandleRequest(request);
+                            HandleRequest(request);
                         }
                         catch (Exception e)
                         {
@@ -41,11 +38,12 @@ public class DaemonWorker : BackgroundService
                     }
                 }
 
-                using (var writer = new StreamWriter(pipeServer, leaveOpen: true))
+                await using (var writer = new StreamWriter(pipeServer, leaveOpen: true))
                 {
-                    while(_responseQueue.TryDequeue(out var response))
+                    while(ResponseQueue.TryDequeue(out var response))
                     {
                         var payload = JsonSerializer.Serialize(response);
+                        Logger.LogInfo("Daemon Worker sent " + response.ResponseType);
                         await writer.WriteLineAsync(payload);
                     }
                 }
@@ -69,7 +67,7 @@ public class DaemonWorker : BackgroundService
         }
     }
 
-    private async Task HandleRequest(DaemonServerRequest? request)
+    private void HandleRequest(DaemonServerRequest? request)
     {
         if (request == null)
         {
@@ -77,29 +75,44 @@ public class DaemonWorker : BackgroundService
         }
         else
         {
+            Logger.LogInfo("Daemon Responding to " + request.RequestType);
             switch (request.RequestType)
             {
                 case DaemonRequestType.LoadServerList:
-                    Logger.LogInfo("Loading server list");
+                    RespondToServerListRequest();
+                    break;
+                case DaemonRequestType.LoadLocalUserList:
+                    RespondToUserListRequest();
                     break;
                 case DaemonRequestType.MessageUser:
-                    Logger.LogInfo("MessageUser");
                     break;
                 case DaemonRequestType.ReceiveUserMessage:
-                    Logger.LogInfo("ReceiveUserMessage");
                     break;
                 case DaemonRequestType.Ping:
-                    Logger.LogInfo("Pong");
-                    await RespondToPingRequest();
+                    RespondToPingRequest();
                     break;
                     
             }
         }
     }
 
-    private async Task RespondToPingRequest()
+    private void RespondToPingRequest()
     {
         var response = new DaemonServerResponse(DaemonResponseType.PingSuccess, DateTime.Now.ToString("HH:mm:ss"));
-        _responseQueue.Enqueue(response);
+        ResponseQueue.Enqueue(response);
+    }
+
+    private void RespondToServerListRequest()
+    {
+        var response = new DaemonServerResponse(DaemonResponseType.LoadServerList,
+            JsonSerializer.Serialize(PlaceHolderData.PlaceHolderServerData));
+        ResponseQueue.Enqueue(response);
+    }
+
+    private void RespondToUserListRequest()
+    {
+        var response = new DaemonServerResponse(DaemonResponseType.LoadUserList,
+            JsonSerializer.Serialize(PlaceHolderData.PlaceholderUserData));
+        ResponseQueue.Enqueue(response);
     }
 }

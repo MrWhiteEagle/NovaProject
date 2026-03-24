@@ -8,7 +8,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using NovaProject.Core.Infrastructure.ClientServices;
+using Microsoft.Extensions.DependencyInjection;
+using NovaProject.Client.Services;
 using NovaProject.Core.Services;
 using NovaProject.Views;
 
@@ -17,12 +18,18 @@ namespace NovaProject;
 public partial class App : Application
 {
     private MainWindow _mainWindow;
-    private DaemonBridgeService _daemonBridge;
+    public static IServiceProvider ServiceProvider { get; private set; } = null!;
     public override void Initialize()
     {
+        var collection = new ServiceCollection();
+        collection.AddSingleton<DaemonBridgeService>();
+        collection.AddSingleton<ChatService>();
+        ServiceProvider = collection.BuildServiceProvider();
         AvaloniaXamlLoader.Load(this);
+        //Initial service creation
+        _ = ServiceProvider.GetService<DaemonBridgeService>();
+        _ = ServiceProvider.GetService<ChatService>();
         StartupDaemon();
-        _daemonBridge = new DaemonBridgeService();
     }
 
     private void StartupDaemon()

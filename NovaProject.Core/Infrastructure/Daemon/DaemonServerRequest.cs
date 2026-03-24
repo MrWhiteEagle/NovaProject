@@ -18,6 +18,8 @@ public enum DaemonRequestType
 {
     Ping,
     LoadServerList,
+    LoadLocalUserList,
+    LoadUserConversation,
     MessageUser,
     ReceiveUserMessage,
 }

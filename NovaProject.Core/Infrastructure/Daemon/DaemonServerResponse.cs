@@ -14,5 +14,7 @@ public class DaemonServerResponse
 
 public enum DaemonResponseType
 {
-    PingSuccess
+    PingSuccess,
+    LoadUserList,
+    LoadServerList,
 }

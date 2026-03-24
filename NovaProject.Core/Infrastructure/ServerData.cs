@@ -9,5 +9,5 @@ public class ServerData : UserListDisplayItem
         this.Password = password;
     }
     public string Address { get; set; }
-    private string Password { get; set; }
+    public string Password { get; set; }
 }
