@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="using:NovaProject.CustomControls"
              xmlns:ccvm="using:NovaProject.CustomControls.ViewModels"
-             xmlns:m="using:NovaProject.Models"
              xmlns:infrastructure="clr-namespace:NovaProject.Core.Infrastructure;assembly=NovaProject.Core"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBody"
@@ -19,10 +18,10 @@
             x:Name="MessageList">
             <ItemsControl ItemsSource="{Binding Messages}">
                 <ItemsControl.DataTemplates>
-                    <DataTemplate DataType="{x:Type infrastructure:MessageInbound}">
+                    <DataTemplate DataType="{x:Type infrastructure:MessageOutgoing}">
                         <cc:ChatBubble MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
                     </DataTemplate>
-                    <DataTemplate DataType="{x:Type infrastructure:MessageOutbound}">
+                    <DataTemplate DataType="{x:Type infrastructure:MessageIncoming}">
                         <cc:ChatBubbleOther MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
                     </DataTemplate>
                 </ItemsControl.DataTemplates>

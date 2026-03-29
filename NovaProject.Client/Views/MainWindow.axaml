@@ -130,8 +130,6 @@
                         x:Name="ChatField"
                         Grid.Row="2"
                         ZIndex="1"
-                        MessageSent="ChatField_OnMessageSent"
-                        MessageReceived="ChatField_OnMessageReceived"
                         DataContext="{Binding Input}">
                     </cc:ChatInput>
                 </Grid>

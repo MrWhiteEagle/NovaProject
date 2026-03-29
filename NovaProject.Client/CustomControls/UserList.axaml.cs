@@ -2,7 +2,10 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
+using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Structs;
 using NovaProject.CustomControls.ViewModels;
 using NovaProject.Models.Events;
 
@@ -31,13 +34,10 @@ public partial class UserList : UserControl
         //Raise Routed Event for chat switch
         if (b.DataContext is User u && this.DataContext is UserListViewModel)
         {
-            var args = new OpenConversationEventArgs(OpenConversationEvent, u);
-            RaiseEvent(args);
+            App.ServiceProvider.GetRequiredService<ChatService>().SwitchConversation(u);
         }else if (b.DataContext is ServerData s && this.DataContext is UserListViewModel)
         {
-            Console.WriteLine("UserListOK");
-            var args = new OpenServerEventArgs(OpenServerEvent, s);
-            RaiseEvent(args);
+            App.ServiceProvider.GetRequiredService<ChatService>().SwitchServer(s);
         }
         
         

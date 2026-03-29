@@ -1,38 +1,53 @@
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
+using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Structs;
 using NovaProject.Core.Services;
-using NovaProject.Models.Events;
 using NovaProject.ViewModels;
 
 namespace NovaProject.CustomControls.ViewModels;
 
 public class ChatBodyViewModel : ViewModelBase
 {
-    private readonly User? _currentUser = AppGlobalService.CurrentUser;
-    public User? Recipient;
+    private readonly LocalUid? _currentUser = AppGlobalService.LocalUid;
+    public LocalUid? Recipient;
 
     public ObservableCollection<MessageIo> Messages { get; set; } = new();
 
-    public void UpdateMessageList(MessageSentEventArgs e)
+    public ChatBodyViewModel()
     {
-        if (_currentUser != null && Recipient != null)
-                Messages.Add(
-                    new MessageInbound(
-                        e.Message,
-                        _currentUser,
-                        Recipient));
+        App.ServiceProvider.GetRequiredService<ChatService>().OnMessageReceived += OnMessageReceived;
+        App.ServiceProvider.GetRequiredService<ChatService>().OnMessageSent += OnMessageSent;
     }
 
-    public void UpdateMessageList(MessageReceivedEventArgs e)
+    private void OnMessageReceived(MessageData data)
     {
-        if (_currentUser != null && Recipient != null)
-            Messages.Add(
-                new MessageOutbound(
-                    e.Message,
-                    _currentUser,
-                    Recipient));
+        if (data.Sender == Recipient)
+        {
+            Messages.Add(new MessageIncoming(
+                data.Message,
+                data.Sender,
+                _currentUser!
+                ));
+        }
+        else
+        {
+            Logger.LogInfo("Sender didnt match with " + Recipient.UserName + ". Was: " + data.Sender.UserName);
+        }
     }
-    public void ChangeUserContext(User user)
+
+    private void OnMessageSent(MessageData data)
+    {
+        if (data.Recipient == Recipient)
+        {
+            Messages.Add(new MessageOutgoing(
+                data.Message,
+                data.Sender,
+                data.Recipient));
+        }
+    }
+    public void ChangeUserContext(LocalUid user)
     {
         Recipient = user;
     }

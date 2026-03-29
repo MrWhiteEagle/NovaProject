@@ -20,7 +20,7 @@
                 HorizontalAlignment="Stretch"
                 Foreground="White"
                 TextAlignment="Left"
-                Text="{Binding UserContext.DisplayName}">
+                Text="{Binding UserContext.UserName}">
             </TextBlock>
             <Button
                 Grid.Column="2"

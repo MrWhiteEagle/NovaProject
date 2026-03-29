@@ -17,9 +17,6 @@ public partial class MainWindow : Window
         DataContext = _vm;
         this.Loaded += MainWindow_OnLoaded;
         this.Closing += MainWindow_OnClose;
-        AddHandler(UserList.OpenConversationEvent, OnOpenConversationRequest, RoutingStrategies.Bubble);
-        AddHandler(UserList.OpenServerEvent, OnOpenServerRequest, RoutingStrategies.Bubble);
-        AddHandler(ChatTitlebar.CallRequestEvent, OnCallOutboundRequest, RoutingStrategies.Bubble);
     }
 
     #region Events
@@ -35,33 +32,6 @@ public partial class MainWindow : Window
         e.Cancel = true;
         this.Hide();
         this.WindowState = WindowState.Minimized;
-    }
-    #endregion
-
-    #region InterceptEventCommunication
-    private void ChatField_OnMessageSent(object? sender, MessageSentEventArgs e)
-    {
-        _vm.UpdateMessagesRequest(e);
-    }
-
-    private void ChatField_OnMessageReceived(object? sender, MessageReceivedEventArgs e)
-    {
-        _vm.UpdateMessagesRequest(e);
-    }
-
-    private void OnOpenConversationRequest(object? sender, OpenConversationEventArgs e)
-    {
-        _vm.OpenConversationRequest(e);
-    }
-
-    private void OnCallOutboundRequest(object? sender, CallRequestEventArgs e)
-    {
-        _vm.OpenOutboundCallRequest(e);
-    }
-
-    private void OnOpenServerRequest(object? sender, OpenServerEventArgs e)
-    {
-        _vm.OpenServerRequest(e);
     }
     #endregion
 }

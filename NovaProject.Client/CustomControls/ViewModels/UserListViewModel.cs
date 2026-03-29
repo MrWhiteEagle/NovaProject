@@ -29,13 +29,16 @@ public partial class UserListViewModel : ViewModelBase
         {
             case UserListDataType.ServerData:
                 App.ServiceProvider.GetRequiredService<ChatService>().OnServerListUpdated += UpdateData;
+                App.ServiceProvider.GetRequiredService<ChatService>().LoadSavedServersRequest();
                 break;
             case UserListDataType.UserData:
                 App.ServiceProvider.GetRequiredService<ChatService>().OnUserListUpdated += UpdateData;
+                App.ServiceProvider.GetRequiredService<ChatService>().LoadUserListRequest();
                 break;
         }
     }
     public ObservableCollection<UserListDisplayItem> DisplayItemList { get; } = [];
+    //TODO: Refactor to use Local structs instead classes, user class should be reserved for daemon and server only
     
     public void AddDataToList(UserListDisplayItem item)
     {

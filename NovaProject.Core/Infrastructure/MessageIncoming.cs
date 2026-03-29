@@ -1,6 +1,8 @@
+using NovaProject.Core.Infrastructure.Structs;
+
 namespace NovaProject.Core.Infrastructure;
 
-public class MessageOutbound(string content, User sender, User recipient) : MessageIo(content, sender, recipient)
+public class MessageIncoming(string content, LocalUid sender, LocalUid recipient) : MessageIo(content, sender, recipient)
 {
     public void EditMessage(string newContent)
     {

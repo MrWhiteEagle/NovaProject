@@ -5,10 +5,11 @@ namespace NovaProject.Core.Infrastructure;
 
 public class UserListDisplayItem : INotifyPropertyChanged
 {
-    public UserListDisplayItem(string name, string displayName)
+    public UserListDisplayItem(string name, string displayName, string relayAddress = "")
     {
         _name = name;
         _displayName = displayName;
+        _relayAddress = relayAddress;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -30,6 +31,14 @@ public class UserListDisplayItem : INotifyPropertyChanged
     {
         get => _displayName; 
         set { _displayName = value; OnPropertyChanged(); }
+    }
+    
+    private string _relayAddress;
+
+    public string RelayAddress
+    {
+        get => _relayAddress;
+        set { _relayAddress = value; OnPropertyChanged(); }
     }
 
     private int _unreadCount;
