@@ -2,9 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:cc="using:NovaProject.CustomControls"
-             xmlns:ccvm="using:NovaProject.CustomControls.ViewModels"
-             xmlns:infrastructure="clr-namespace:NovaProject.Core.Infrastructure;assembly=NovaProject.Core"
+             xmlns:ccvm="using:NovaProject.Client.CustomControls.ViewModels"
+             xmlns:infrastructure="clr-namespace:NovaProject.Core.Infrastructure.Ui;assembly=NovaProject.Core"
+             xmlns:chatElements="clr-namespace:NovaProject.Client.CustomControls.ChatElements"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBody"
              x:DataType="ccvm:ChatBodyViewModel">
@@ -18,11 +18,11 @@
             x:Name="MessageList">
             <ItemsControl ItemsSource="{Binding Messages}">
                 <ItemsControl.DataTemplates>
-                    <DataTemplate DataType="{x:Type infrastructure:MessageOutgoing}">
-                        <cc:ChatBubble MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
+                    <DataTemplate DataType="{x:Type infrastructure:TextMessageOutgoing}">
+                        <chatElements:ChatBubble MessageText="{Binding Text}" SentAt="{Binding Time}"/>
                     </DataTemplate>
-                    <DataTemplate DataType="{x:Type infrastructure:MessageIncoming}">
-                        <cc:ChatBubbleOther MessageContent="{Binding Content}" SentAt="{Binding Time}"/>
+                    <DataTemplate DataType="{x:Type infrastructure:TextMessageIncoming}">
+                        <chatElements:ChatBubbleOther MessageText="{Binding Text}" SentAt="{Binding Time}"/>
                     </DataTemplate>
                 </ItemsControl.DataTemplates>
                 <ItemsControl.ItemTemplate>

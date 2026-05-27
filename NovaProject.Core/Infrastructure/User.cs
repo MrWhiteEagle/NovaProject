@@ -1,4 +1,4 @@
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
 
 namespace NovaProject.Core.Infrastructure;
 

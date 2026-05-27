@@ -1,10 +1,10 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using NovaProject.CustomControls.ViewModels;
-using NovaProject.Models.Events;
+using NovaProject.Client.CustomControls.ViewModels;
+using NovaProject.Client.Models.Events;
 
-namespace NovaProject.CustomControls;
+namespace NovaProject.Client.CustomControls;
 
 public partial class ChatTitlebar : UserControl
 {

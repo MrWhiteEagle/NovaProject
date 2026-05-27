@@ -1,7 +1,7 @@
 using Avalonia.Interactivity;
 using NovaProject.Core.Infrastructure;
 
-namespace NovaProject.Models.Events;
+namespace NovaProject.Client.Models.Events;
 
 public class OpenServerEventArgs : RoutedEventArgs
 {

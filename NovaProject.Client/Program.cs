@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using System;
+using NovaProject.Client;
 
 namespace NovaProject;
 

@@ -1,21 +1,31 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:NovaProject.ViewModels"
-        xmlns:cvm="using:NovaProject.CustomControls.ViewModels"
+        xmlns:cvm="using:NovaProject.Client.CustomControls.ViewModels"
         xmlns:cc="using:NovaProject.CustomControls"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:NovaProject.Client.ViewModels"
+        xmlns:customControls="clr-namespace:NovaProject.Client.CustomControls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="NovaProject.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
+        x:Class="NovaProject.Client.Views.MainWindow"
+        x:DataType="viewModels:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="NovaProject.Client"
         Background="#111111">
-
-    <SplitView
-        DisplayMode="CompactInline"
-        IsPaneOpen="{Binding IsPaneOpen}"
-        CompactPaneLength="60">
+    <Grid>
+        <ProgressBar 
+            IsVisible="{Binding !IsContextInitialized}" 
+            VerticalAlignment="Center" 
+            HorizontalAlignment="Center" 
+            ZIndex="10" 
+            IsIndeterminate="True"
+            Foreground="{StaticResource Primary}"
+            ></ProgressBar>
+        <SplitView
+            DisplayMode="CompactInline"
+            IsVisible="{Binding IsContextInitialized}"
+            IsPaneOpen="{Binding IsPaneOpen}"
+            CompactPaneLength="60">
         <SplitView.Pane>
             <Grid
                 ColumnDefinitions="*"
@@ -69,9 +79,9 @@
                     Grid.Row="2">
                     <ContentControl.DataTemplates>
                         <DataTemplate DataType="cvm:UserListViewModel">
-                            <cc:UserList>
+                            <customControls:UserList>
 
-                            </cc:UserList>
+                            </customControls:UserList>
                         </DataTemplate>
                     </ContentControl.DataTemplates>
                 </ContentControl>
@@ -103,11 +113,11 @@
                 Background="{DynamicResource ChatBodyBackgroundGradient}"
                 >
                 <Grid RowDefinitions="100, *, Auto">
-                    <cc:ChatTitlebar
+                    <customControls:ChatTitlebar
                         x:Name="ChatTitle"
                         DataContext="{Binding Titlebar}"
                         ZIndex="1">
-                    </cc:ChatTitlebar>
+                    </customControls:ChatTitlebar>
                     <ContentControl
                         Grid.Row="0"
                         Grid.RowSpan="3"
@@ -136,5 +146,7 @@
             </Border>
         </SplitView.Content>
     </SplitView>
+        
+    </Grid>
 
 </Window>

@@ -2,25 +2,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:cc="clr-namespace:NovaProject.CustomControls"
+             xmlns:cc="clr-namespace:NovaProject.Client.CustomControls.ChatElements"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NovaProject.CustomControls.ChatBubble"
-             x:DataType="cc:ChatBubble">
+             x:Class="NovaProject.Client.CustomControls.ChatElements.ChatBubbleOther"
+             x:DataType="cc:ChatBubbleOther">
     <Grid
-        ColumnDefinitions="50, 50, 50, 50, *, Auto"
-        Classes="ChatBubbleSelfGrid"
+        ColumnDefinitions="Auto, *, 50, 50, 50, 50"
+        Classes="ChatBubbleOtherGrid"
         PointerEntered="InputElement_OnPointerEntered"
         PointerExited="InputElement_OnPointerExited">
-        <Button
-            x:Name="EditMessageButton"
-            Classes="RegularIconButton"
-            VerticalAlignment="Bottom"
-            IsVisible="False">
-            <PathIcon
-                Data="{DynamicResource EditRegular}"></PathIcon>
-        </Button>
-        <Button
+        <Border
+            Grid.Column="0"
+            x:Name="MessageBody"
+            Classes="ChatBubbleOther">
+            <TextBlock x:Name="MessageBlock" Text="{Binding $parent[cc:ChatBubbleOther].MessageText}" />
+        </Border>
+        <TextBlock
             Grid.Column="1"
+            x:Name="TimeReceivedText"
+            IsVisible="False"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            Margin="10,0,0,0"
+            Foreground="{DynamicResource Gray100}"
+            Text="{Binding $parent[cc:ChatBubbleOther].SentAt, StringFormat='{}{0:HH:mm}'}"></TextBlock>
+        <Button
+            Grid.Column="2"
             x:Name="RespondToMessageButton"
             Classes="RegularIconButton"
             VerticalAlignment="Bottom"
@@ -29,7 +36,7 @@
                 Data="{DynamicResource ArrowReplyRegular}"></PathIcon>
         </Button>
         <Button
-            Grid.Column="2"
+            Grid.Column="3"
             x:Name="DeleteMessageButton"
             Classes="RegularIconButton"
             VerticalAlignment="Bottom"
@@ -38,7 +45,7 @@
                 Data="{DynamicResource DeleteRegular}"></PathIcon>
         </Button>
         <Button
-            Grid.Column="3"
+            Grid.Column="4"
             x:Name="MoreMessageActionsButton"
             Classes="RegularIconButton"
             VerticalAlignment="Bottom"
@@ -46,21 +53,14 @@
             <PathIcon
                 Data="{DynamicResource MoreRegular}"></PathIcon>
         </Button>
-        <TextBlock
-            Grid.Column="4"
-            x:Name="TimeReceivedText"
-            IsVisible="False"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Margin="0,0,10,0"
-            Foreground="{DynamicResource Gray100}"
-            Text="{Binding $parent[cc:ChatBubble].SentAt, StringFormat='{}{0:HH:mm}'}"></TextBlock>
-        <Border
+        <Button
             Grid.Column="5"
-            x:Name="MessageBody"
-            Classes="ChatBubbleSelf"
-            HorizontalAlignment="Right">
-            <TextBlock x:Name="MessageBlock" Text="{Binding $parent[cc:ChatBubble].MessageContent}" />
-        </Border>
+            x:Name="EditMessageButton"
+            Classes="RegularIconButton"
+            VerticalAlignment="Bottom"
+            IsVisible="False">
+            <PathIcon
+                Data="{DynamicResource EditRegular}"></PathIcon>
+        </Button>
     </Grid>
 </UserControl>

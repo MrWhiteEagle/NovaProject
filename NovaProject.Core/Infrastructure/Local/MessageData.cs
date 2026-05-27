@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace NovaProject.Core.Infrastructure.Structs;
+namespace NovaProject.Core.Infrastructure.Local;
 
 public struct MessageData
 {
@@ -13,11 +13,17 @@ public struct MessageData
     [JsonPropertyName("Recipient")]
     public LocalUid Recipient { get; init; }
     
+    [JsonPropertyName("Content")]
+    public string Content { get; init; }
+    
     [JsonConstructor]
-    public MessageData(string message, LocalUid sender, LocalUid recipient)
+    public MessageData(string message, LocalUid sender, LocalUid recipient, string content = "")
     {
         this.Message = message;
         this.Sender = sender;
         this.Recipient = recipient;
+        this.Content = content;
     }
+    
+    
 }

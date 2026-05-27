@@ -3,13 +3,12 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
+using NovaProject.Client.CustomControls.ViewModels;
+using NovaProject.Client.Models.Events;
 using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
-using NovaProject.CustomControls.ViewModels;
-using NovaProject.Models.Events;
 
-namespace NovaProject.CustomControls;
+namespace NovaProject.Client.CustomControls;
 
 public partial class UserList : UserControl
 {

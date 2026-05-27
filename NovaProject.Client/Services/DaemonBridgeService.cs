@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Daemon;
+using NovaProject.Core.Infrastructure.Ui.Daemon;
 using NovaProject.Core.Services;
 
 namespace NovaProject.Client.Services;

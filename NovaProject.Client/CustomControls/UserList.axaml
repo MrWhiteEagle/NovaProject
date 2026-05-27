@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:cc="clr-namespace:NovaProject.CustomControls"
-             xmlns:viewModels="clr-namespace:NovaProject.CustomControls.ViewModels"
+             xmlns:viewModels="clr-namespace:NovaProject.Client.CustomControls.ViewModels"
+             xmlns:customControls="clr-namespace:NovaProject.CustomControls"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Name="UserListRoot"
-             x:Class="NovaProject.CustomControls.UserList"
+             x:Class="NovaProject.Client.CustomControls.UserList"
              x:DataType="viewModels:UserListViewModel">
     <ScrollViewer
         Background="Transparent">
@@ -20,7 +20,7 @@
                         <Grid
                             ColumnDefinitions="60, *, 30"
                             RowDefinitions="48">
-                            <cc:UserIconImage></cc:UserIconImage>
+                            <customControls:UserIconImage></customControls:UserIconImage>
                             <TextBlock
                                 Grid.Column="1"
                                 VerticalAlignment="Center"

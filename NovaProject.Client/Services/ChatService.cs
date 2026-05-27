@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using NovaProject.Client.CustomControls.ViewModels;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Daemon;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
+using NovaProject.Core.Infrastructure.Ui.Daemon;
 using NovaProject.Core.Services;
-using NovaProject.CustomControls.ViewModels;
-using NovaProject.Models.Events;
 
 namespace NovaProject.Client.Services;
 

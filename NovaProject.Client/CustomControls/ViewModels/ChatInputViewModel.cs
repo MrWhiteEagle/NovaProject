@@ -1,13 +1,11 @@
-using System;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
-using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Client.ViewModels;
+using NovaProject.Core.Infrastructure.Local;
 using NovaProject.Core.Services;
-using NovaProject.ViewModels;
 
-namespace NovaProject.CustomControls.ViewModels;
+namespace NovaProject.Client.CustomControls.ViewModels;
 
 public partial class ChatInputViewModel : ViewModelBase
 {

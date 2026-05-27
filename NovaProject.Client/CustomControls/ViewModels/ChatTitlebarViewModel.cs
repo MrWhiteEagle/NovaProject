@@ -1,9 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
-using NovaProject.ViewModels;
+using NovaProject.Client.ViewModels;
+using NovaProject.Core.Infrastructure.Local;
 
-namespace NovaProject.CustomControls.ViewModels;
+namespace NovaProject.Client.CustomControls.ViewModels;
 
 public partial class ChatTitlebarViewModel : ViewModelBase
 {

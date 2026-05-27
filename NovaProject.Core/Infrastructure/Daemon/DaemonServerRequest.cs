@@ -1,4 +1,4 @@
-namespace NovaProject.Core.Infrastructure.Daemon;
+namespace NovaProject.Core.Infrastructure.Ui.Daemon;
 
 public class DaemonServerRequest
 {

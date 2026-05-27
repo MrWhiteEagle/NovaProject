@@ -42,4 +42,15 @@
     <ItemGroup>
       <ProjectReference Include="..\NovaProject.Core\NovaProject.Core.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="CustomControls\ChatElements\ChatBubble.axaml.cs">
+        <DependentUpon>ChatBubble.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="CustomControls\ChatElements\ChatBubbleOther.axaml.cs">
+        <DependentUpon>ChatBubbleOther.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

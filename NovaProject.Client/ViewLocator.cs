@@ -2,9 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using NovaProject.ViewModels;
+using NovaProject.Client.ViewModels;
 
-namespace NovaProject;
+namespace NovaProject.Client;
 
 /// <summary>
 /// Given a view model, returns the corresponding view if possible.

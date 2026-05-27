@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace NovaProject.ViewModels;
+namespace NovaProject.Client.ViewModels;
 
 public abstract class ViewModelBase : ObservableObject
 {

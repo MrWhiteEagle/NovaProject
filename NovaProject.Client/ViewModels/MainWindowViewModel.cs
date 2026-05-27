@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
+using NovaProject.Client.CustomControls.ViewModels;
 using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
 using NovaProject.Core.Services;
-using NovaProject.CustomControls.ViewModels;
 
-namespace NovaProject.ViewModels;
+namespace NovaProject.Client.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -30,6 +29,13 @@ public partial class MainWindowViewModel : ViewModelBase
         ThisUser = AppGlobalService.CurrentUser;
         App.ServiceProvider.GetRequiredService<ChatService>().OnConversationSwitch += OpenConversationRequest;
         App.ServiceProvider.GetRequiredService<ChatService>().OnCallOutbound += OpenOutboundCallRequest;
+        App.ServiceProvider.GetRequiredService<ChatService>().OnUserListUpdated += OnOnUserListUpdated;
+        App.ServiceProvider.GetRequiredService<ChatService>().OnServerListUpdated += OnOnUserListUpdated;
+
+        void OnOnUserListUpdated(List<UserListDisplayItem> obj)
+        {
+            this.IsContextInitialized = true;
+        }
     }
 
     public ChatInputViewModel Input { get; set; } = new();
@@ -48,6 +54,7 @@ public partial class MainWindowViewModel : ViewModelBase
     
     
     [ObservableProperty] private bool _isPaneOpen;
+    [ObservableProperty] private bool _isContextInitialized = false;
 
     [RelayCommand]
     private void OpenPane()

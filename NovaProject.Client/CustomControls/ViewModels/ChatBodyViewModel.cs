@@ -1,12 +1,12 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
-using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Client.ViewModels;
+using NovaProject.Core.Infrastructure.Local;
+using NovaProject.Core.Infrastructure.Ui;
 using NovaProject.Core.Services;
-using NovaProject.ViewModels;
 
-namespace NovaProject.CustomControls.ViewModels;
+namespace NovaProject.Client.CustomControls.ViewModels;
 
 public class ChatBodyViewModel : ViewModelBase
 {
@@ -25,7 +25,7 @@ public class ChatBodyViewModel : ViewModelBase
     {
         if (data.Sender == Recipient)
         {
-            Messages.Add(new MessageIncoming(
+            Messages.Add(new TextMessageIncoming(
                 data.Message,
                 data.Sender,
                 _currentUser!
@@ -41,7 +41,7 @@ public class ChatBodyViewModel : ViewModelBase
     {
         if (data.Recipient == Recipient)
         {
-            Messages.Add(new MessageOutgoing(
+            Messages.Add(new TextMessageOutgoing(
                 data.Message,
                 data.Sender,
                 data.Recipient));

@@ -1,7 +1,5 @@
-using System;
-using System.Runtime.CompilerServices;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
 
 namespace NovaProject.Core.Services;
 

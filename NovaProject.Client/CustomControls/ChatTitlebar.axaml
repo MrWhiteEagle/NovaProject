@@ -3,9 +3,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cc="clr-namespace:NovaProject.CustomControls"
-             xmlns:vm="clr-namespace:NovaProject.CustomControls.ViewModels"
+             xmlns:vm="clr-namespace:NovaProject.Client.CustomControls.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="NovaProject.CustomControls.ChatTitlebar"
+             x:Class="NovaProject.Client.CustomControls.ChatTitlebar"
              x:DataType="vm:ChatTitlebarViewModel">
     <Border
         x:Name="ChatTitle"

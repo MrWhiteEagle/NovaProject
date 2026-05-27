@@ -1,20 +1,15 @@
 using System;
-using System.Diagnostics;
-using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
-using NovaProject.Core.Services;
-using NovaProject.Views;
+using NovaProject.Client.Views;
 
-namespace NovaProject;
+namespace NovaProject.Client;
 
 public partial class App : Application
 {

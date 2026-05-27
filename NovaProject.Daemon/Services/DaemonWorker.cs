@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
 using System.IO.Pipes;
 using System.Text.Json;
-using NovaProject.Core.Infrastructure.Daemon;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
+using NovaProject.Core.Infrastructure.Ui.Daemon;
 using NovaProject.Core.Services;
 
 namespace NovaProject.Daemon.Services;

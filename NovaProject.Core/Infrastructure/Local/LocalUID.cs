@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace NovaProject.Core.Infrastructure.Structs;
+namespace NovaProject.Core.Infrastructure.Local;
 
 public record LocalUid(
     [property: JsonPropertyName("Name")] string Name, 
@@ -20,7 +20,7 @@ public record LocalUid(
         return Name == other?.Name && Tag == other.Tag && RelayAddress == other.RelayAddress;
     }
 
-    public override string ToString() => $"[{UserName};{Name};{Tag};{RelayAddress};]";
+    public override string ToString() => $"[{Name}#{Tag}@{RelayAddress};]";
     public User ToUser() => new User(this.Name, this.UserName, this.Tag, this.RelayAddress);
 
 }

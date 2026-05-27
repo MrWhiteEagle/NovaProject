@@ -1,8 +1,7 @@
 using Avalonia.Interactivity;
-using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Structs;
+using NovaProject.Core.Infrastructure.Local;
 
-namespace NovaProject.Models.Events;
+namespace NovaProject.Client.Models.Events;
 
 public class CallRequestEventArgs : RoutedEventArgs
 {

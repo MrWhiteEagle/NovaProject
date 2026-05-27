@@ -1,10 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using NovaProject.CustomControls;
-using NovaProject.Models.Events;
-using NovaProject.ViewModels;
+using NovaProject.Client.ViewModels;
 
-namespace NovaProject.Views;
+namespace NovaProject.Client.Views;
 
 public partial class MainWindow : Window
 {
