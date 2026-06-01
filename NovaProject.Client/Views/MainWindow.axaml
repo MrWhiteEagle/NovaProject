@@ -14,7 +14,7 @@
         Background="#111111">
     <Grid>
         <ProgressBar 
-            IsVisible="{Binding !IsContextInitialized}" 
+            IsVisible="{Binding !WasUserListLoaded}" 
             VerticalAlignment="Center" 
             HorizontalAlignment="Center" 
             ZIndex="10" 
@@ -23,7 +23,7 @@
             ></ProgressBar>
         <SplitView
             DisplayMode="CompactInline"
-            IsVisible="{Binding IsContextInitialized}"
+            IsVisible="{Binding WasUserListLoaded}"
             IsPaneOpen="{Binding IsPaneOpen}"
             CompactPaneLength="60">
         <SplitView.Pane>
@@ -112,11 +112,22 @@
                 CornerRadius="10,0,0,10"
                 Background="{DynamicResource ChatBodyBackgroundGradient}"
                 >
-                <Grid RowDefinitions="100, *, Auto">
+                <Grid>
+                    <Panel
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        IsVisible="{Binding !IsContextInitialized}">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center">
+                            Nothing here but us, Chickens!
+                        </TextBlock>
+                    </Panel>
+                    <Grid RowDefinitions="100, *, Auto" IsVisible="{Binding IsContextInitialized}">
                     <customControls:ChatTitlebar
-                        x:Name="ChatTitle"
-                        DataContext="{Binding Titlebar}"
-                        ZIndex="1">
+                            x:Name="ChatTitle"
+                            DataContext="{Binding Titlebar}"
+                            ZIndex="1">
                     </customControls:ChatTitlebar>
                     <ContentControl
                         Grid.Row="0"
@@ -142,6 +153,7 @@
                         ZIndex="1"
                         DataContext="{Binding Input}">
                     </cc:ChatInput>
+                </Grid>
                 </Grid>
             </Border>
         </SplitView.Content>

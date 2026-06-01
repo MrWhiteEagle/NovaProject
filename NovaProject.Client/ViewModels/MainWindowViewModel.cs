@@ -34,7 +34,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
         void OnOnUserListUpdated(List<UserListDisplayItem> obj)
         {
-            this.IsContextInitialized = true;
+            this.WasUserListLoaded = true;
         }
     }
 
@@ -55,6 +55,7 @@ public partial class MainWindowViewModel : ViewModelBase
     
     [ObservableProperty] private bool _isPaneOpen;
     [ObservableProperty] private bool _isContextInitialized = false;
+    [ObservableProperty] private bool _wasUserListLoaded = false;
 
     [RelayCommand]
     private void OpenPane()
@@ -83,8 +84,12 @@ public partial class MainWindowViewModel : ViewModelBase
         //TODO: ADD DATA FETCH FOR BODY
         
         Body = chat;
-        Titlebar.ChangeUserContext(chat.Recipient!);
-        Input.ChangeUserContext(chat.Recipient!);
+        if (chat.Recipient != null)
+        {
+            Titlebar.ChangeUserContext(chat.Recipient);
+            Input.ChangeUserContext(chat.Recipient);
+            IsContextInitialized = true;
+        }
     }
 
     public void OpenOutboundCallRequest(LocalUid localUid)
