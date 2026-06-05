@@ -9,6 +9,7 @@ public static class AppGlobalService
     public static LocalUid? LocalUid { get; private set; }
 
     public static int MessageNotificationTime = 5;
+    public static int MessageHistoryLimit = 100;
 
     public static void SetCurrentUser(User user)
     {

@@ -28,6 +28,12 @@ public class Program
         Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
+                services.AddSingleton<DaemonDataService>(sp =>
+                {
+                    string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                    string dbpath = Path.Combine(baseDir, "nova.db");
+                    return new DaemonDataService(dbpath);
+                });
                 services.AddHostedService<DaemonWorker>();
             });
 }

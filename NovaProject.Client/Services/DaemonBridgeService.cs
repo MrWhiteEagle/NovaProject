@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Local;
 using NovaProject.Core.Infrastructure.Ui.Daemon;
 using NovaProject.Core.Services;
 
@@ -19,6 +20,7 @@ namespace NovaProject.Client.Services;
 public class DaemonBridgeService
 {
     private bool _isConnected = false;
+    private bool _HasDaemonInitialized = false;
     private readonly CancellationTokenSource _cts = new();
     private ConcurrentQueue<DaemonServerRequest> _requestQueue = new();
     public DaemonBridgeService()
@@ -31,7 +33,24 @@ public class DaemonBridgeService
         StartupDaemon();
         Logger.LogInfo("Initializing Daemon Server Bridge connection...");
         await using var client = new NamedPipeClientStream(".", "NovaProject_Pipe", PipeDirection.InOut);
-        await client.ConnectAsync();
+        while (!client.IsConnected && !_cts.IsCancellationRequested)
+        {
+            try
+            {
+                // Try to connect with a 2-second timeout
+                await client.ConnectAsync(2000, _cts.Token);
+                Logger.LogInfo("Pipe connection established!");
+            }
+            catch (TimeoutException)
+            {
+                Logger.LogInfo("Waiting for Daemon pipe to become available...");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"Connection error: {e.Message}");
+                await Task.Delay(1000);
+            }
+        }
         using var reader = new StreamReader(client, leaveOpen: true);
         using var writer = new StreamWriter(client) { AutoFlush = true };
         Logger.LogInfo("Trying daemon handshake...");
@@ -65,10 +84,24 @@ public class DaemonBridgeService
             try
             {
                 Logger.LogInfo("Bridge ready for send");
+                while (!_cts.IsCancellationRequested && !_HasDaemonInitialized)
+                {
+                    Logger.LogInfo("Attempting handshake ping...");
+                    var ping = new DaemonServerRequest(payload: DateTime.Now.ToString());
+                    var jsonPing = JsonSerializer.Serialize(ping);
+                    await writer.WriteLineAsync(jsonPing);
+            
+                    // Wait 1 second before trying to ping again
+                    await Task.Delay(1000); 
+                }
+                
+                Logger.LogInfo("HANDSHAKE CONFIRMED, request gate is open...");
+                
                 while (!_cts.IsCancellationRequested && client.IsConnected)
                 {
                     if (_requestQueue.TryDequeue(out var request))
                     {
+                        Logger.LogInfo("Bridge sending request...");
                         var json = JsonSerializer.Serialize(request);
                         await writer.WriteLineAsync(json);
                         await client.FlushAsync();
@@ -84,9 +117,6 @@ public class DaemonBridgeService
                 Logger.LogError("Bridge send error: " + e.Message);
             }
         });
-        PingDaemon();
-        // SendRequest(new DaemonServerRequest(DaemonRequestType.LoadLocalUserList));
-        // SendRequest(new DaemonServerRequest(DaemonRequestType.LoadServerList));
         await Task.WhenAll(listen, send);
         client.Dispose();
         writer.Dispose();
@@ -158,6 +188,8 @@ public class DaemonBridgeService
         switch (response.ResponseType)
         {
             case DaemonResponseType.PingSuccess:
+                Logger.LogInfo("Ping successful");
+                _HasDaemonInitialized = true;
                 break;
             case DaemonResponseType.LoadUserList:
                 Logger.LogInfo("Loading UserList from daemon...");
@@ -167,8 +199,12 @@ public class DaemonBridgeService
                 Logger.LogInfo("Loading ServerList from daemon...");
                 App.ServiceProvider.GetService<ChatService>()?.UpdateServerList(JsonSerializer.Deserialize<List<ServerData>>(response.Payload));
                 break;
+            case DaemonResponseType.LoadUserConversation:
+                App.ServiceProvider.GetService<ChatService>()?.LoadUserConversation(JsonSerializer.Deserialize<List<MessageData>>(response.Payload));
+                Logger.LogInfo("Loading UserConversation from daemon...");
+                break;
             case DaemonResponseType.MessageInbound:
-                Logger.LogInfo("Message in bound from daemon...");
+                Logger.LogInfo("Message inbound from daemon...");
                 App.ServiceProvider.GetService<ChatService>()?.ReceiveMessage(response);
                 break;
                 
@@ -178,13 +214,13 @@ public class DaemonBridgeService
     public void SendRequest(DaemonServerRequest request)
     {
         _requestQueue.Enqueue(request);
-        Logger.LogInfo("Sending request to Daemon Server...");
+        Logger.LogInfo($"Request queued: {request.RequestType}");
     }
 
     public void GetUserConversation(User user)
     {
         var request = new DaemonServerRequest(DaemonRequestType.LoadUserConversation, JsonSerializer.Serialize(user));
-        _requestQueue.Enqueue(request);
+        SendRequest(request);
     }
 
     private void HandleInboundMessage(DaemonServerResponse response)

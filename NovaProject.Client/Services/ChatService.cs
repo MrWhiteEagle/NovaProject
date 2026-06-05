@@ -16,6 +16,7 @@ public class ChatService
     private readonly Dictionary<LocalUid, ChatBodyViewModel> _loadedChats = new();
     public event Action<List<UserListDisplayItem>>? OnUserListUpdated;
     public event Action<List<UserListDisplayItem>>? OnServerListUpdated;
+    public event Action<List<MessageData>>? OnUserConversationLoaded;
     public event Action<MessageData>? OnMessageReceived;
     public event Action<MessageData>? OnMessageSent;
     public event Action<LocalUid>? OnConversationSwitch;
@@ -39,6 +40,18 @@ public class ChatService
         _daemon.SendRequest(request);
     }
 
+    public void LoadUserConversationRequest(LocalUid target)
+    {
+        var request = new DaemonServerRequest(DaemonRequestType.LoadUserConversation, "localhost", target.ToString());
+        _daemon.SendRequest(request);
+    }
+
+    public void LoadUserConversation(List<MessageData>? messages)
+    {
+        OnUserConversationLoaded?.Invoke(messages);
+        Logger.LogInfo("Loading UserConversation from daemon");
+    }
+    
     public void UpdateServerList(List<ServerData>? serverList)
     {
         var newServerList = serverList.Cast<UserListDisplayItem>().ToList();
@@ -97,16 +110,13 @@ public class ChatService
         {
             return chat;
         }
-        else
-        {
-            _daemon.GetUserConversation(ExtractDataFromLocalId(localUid));
-            var newChat = new ChatBodyViewModel();
-            newChat.ChangeUserContext(localUid);
-            RegisterChat(newChat, newChat.Recipient!);
-            return newChat;
-        }
+        _daemon.GetUserConversation(ExtractDataFromLocalId(localUid));
+        var newChat = new ChatBodyViewModel();
+        newChat.ChangeUserContext(localUid);
+        RegisterChat(newChat, newChat.Recipient!);
+        return newChat;
     }
-    public void RegisterChat(ChatBodyViewModel chatBody, LocalUid userId)
+    private void RegisterChat(ChatBodyViewModel chatBody, LocalUid userId)
     {
         _loadedChats.Add(userId, chatBody);
     }

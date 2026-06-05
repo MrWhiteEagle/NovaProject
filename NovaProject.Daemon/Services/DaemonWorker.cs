@@ -7,9 +7,10 @@ using NovaProject.Core.Services;
 
 namespace NovaProject.Daemon.Services;
 
-public class DaemonWorker : BackgroundService
+public class DaemonWorker(DaemonDataService dataService) : BackgroundService
 {
     private ConcurrentQueue<DaemonServerResponse> ResponseQueue { get; } = new();
+    private DaemonDataService _dataService { get; } = dataService;
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Logger.LogInfo("Daemon Worker waiting for handshake...");
@@ -92,6 +93,12 @@ public class DaemonWorker : BackgroundService
                 case DaemonRequestType.MessageOutbound:
                     RespondToPrivateMessageOutgoing(request);
                     break;
+                case DaemonRequestType.MessageInbound:
+                    break;
+                case DaemonRequestType.LoadUserConversation:
+                    //Needs to be Task.Run in order to run it asynchronously without needing the whole HandleBlock to be
+                    Task.Run(() => HandleLoadingUserConversation(request));
+                    break;
                 case DaemonRequestType.Ping:
                     RespondToPingRequest();
                     break;
@@ -100,6 +107,7 @@ public class DaemonWorker : BackgroundService
         }
     }
 
+    #region Response Methods
     private void RespondToPingRequest()
     {
         var response = new DaemonServerResponse(DaemonResponseType.PingSuccess, DateTime.Now.ToString("HH:mm:ss"));
@@ -128,15 +136,15 @@ public class DaemonWorker : BackgroundService
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var payload = JsonSerializer.Deserialize<MessageData>(request.Payload, options);
-
-            // NULL GUARD: This is where your crash was happening
+            Task.Run(() => _dataService.SaveMessage(payload));
+            //TODO: implement a notification for the UI that the message was sent correctly to relay and the relay received it
             if (payload.Sender == null || payload.Recipient == null)
             {
                 Logger.LogError("CRITICAL: MessageData deserialized but Sender/Recipient are NULL!");
                 Logger.LogInfo($"Check the JSON keys in this payload: {request.Payload}");
                 return;
             }
-            var newMessage = new MessageData("REBOUND MESSAGE: " + payload.Message, payload.Recipient, payload.Sender);
+            var newMessage = new MessageData(payload.Recipient, payload.Sender, "REBOUND MESSAGE: " + payload.Content, direction: MessageData.MessageDirection.Incoming);
             Logger.LogInfo($"Rebounding message from {newMessage.Sender.UserName ?? "Unknown"} to {newMessage.Recipient.UserName ?? "Unknown"}");
             var newPayload = JsonSerializer.Serialize(newMessage);
             var rebounce = new DaemonServerResponse(DaemonResponseType.MessageInbound, newPayload);
@@ -147,14 +155,25 @@ public class DaemonWorker : BackgroundService
             Logger.LogError("Daemon failed to process Outgoing message " + e.Message);   
         }
     }
-    
-    private void RespondToPrivateMessageIncoming()
+
+    private void RespondToPrivateMessageIncoming(DaemonServerRequest request)
     {
+        //TODO: Implement once the server project is ready
         
+        // var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        // var payload = JsonSerializer.Deserialize<MessageData>(request.Payload, options);
+    }
+
+    private async Task HandleLoadingUserConversation(DaemonServerRequest? request)
+    {
+        var dbResult = await _dataService.GetMessageHistory(request.Payload);
+        var response = new DaemonServerResponse(DaemonResponseType.LoadUserConversation, JsonSerializer.Serialize(dbResult));
+        ResponseQueue.Enqueue(response);
     }
 
     private void ForwardMessageToRelay(DaemonServerRequest request)
     {
         Logger.LogCritical("SENDING PRIVATE MESSAGE TO RELAY SERVER");
     }
+    #endregion
 }

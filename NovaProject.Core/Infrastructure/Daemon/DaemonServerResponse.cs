@@ -17,5 +17,6 @@ public enum DaemonResponseType
     PingSuccess,
     LoadUserList,
     LoadServerList,
+    LoadUserConversation,
     MessageInbound
 }

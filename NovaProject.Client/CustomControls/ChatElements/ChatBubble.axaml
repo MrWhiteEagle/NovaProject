@@ -6,11 +6,13 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.Client.CustomControls.ChatElements.ChatBubble"
              x:DataType="ce:ChatBubble">
+    <Grid>
     <Grid
-        ColumnDefinitions="50, 50, 50, 50, *, Auto"
-        Classes="ChatBubbleSelfGrid"
-        PointerEntered="InputElement_OnPointerEntered"
-        PointerExited="InputElement_OnPointerExited">
+            ColumnDefinitions="50, 50, 50, 50, *, Auto"
+            Classes="ChatBubbleSelfGrid"
+            PointerEntered="InputElement_OnPointerEntered"
+            PointerExited="InputElement_OnPointerExited"
+            IsVisible="{Binding !IsIncoming}">
         <Button
             x:Name="EditMessageButton"
             Classes="RegularIconButton"
@@ -62,5 +64,7 @@
             HorizontalAlignment="Right">
             <TextBlock x:Name="MessageBlock" Text="{Binding $parent[ce:ChatBubble].MessageText}" />
         </Border>
+    </Grid>
+        
     </Grid>
 </UserControl>

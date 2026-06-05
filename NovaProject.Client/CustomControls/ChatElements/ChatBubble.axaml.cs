@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using NovaProject.Core.Infrastructure.Local;
 
 namespace NovaProject.Client.CustomControls.ChatElements;
 
@@ -11,6 +12,8 @@ public partial class ChatBubble : UserControl
         AvaloniaProperty.Register<ChatBubble, string>(nameof(MessageText));
     public static readonly StyledProperty<DateTime> SentAtProperty =
         AvaloniaProperty.Register<ChatBubble, DateTime>(nameof(SentAt));
+    public static readonly StyledProperty<MessageData.MessageDirection> MessageDirectionProperty =
+        AvaloniaProperty.Register<ChatBubble, MessageData.MessageDirection>(nameof(MessageDirection));
     public ChatBubble()
     {
         InitializeComponent();
@@ -25,6 +28,17 @@ public partial class ChatBubble : UserControl
     {
         get => GetValue(SentAtProperty);
         set => SetValue(SentAtProperty, value);
+    }
+
+    public MessageData.MessageDirection MessageDirection
+    {
+        get => GetValue(MessageDirectionProperty);
+        set => SetValue(MessageDirectionProperty, value);
+    }
+
+    public bool IsIncoming
+    {
+        get => MessageDirection == MessageData.MessageDirection.Incoming ?  true : false;
     }
     private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
     {

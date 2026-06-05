@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
@@ -13,7 +14,7 @@ public class ChatBodyViewModel : ViewModelBase
     private readonly LocalUid? _currentUser = AppGlobalService.LocalUid;
     public LocalUid? Recipient;
 
-    public ObservableCollection<MessageIo> Messages { get; set; } = new();
+    public ObservableCollection<MessageData> Messages { get; set; } = new();
 
     public ChatBodyViewModel()
     {
@@ -25,11 +26,12 @@ public class ChatBodyViewModel : ViewModelBase
     {
         if (data.Sender == Recipient)
         {
-            Messages.Add(new TextMessageIncoming(
-                data.Message,
-                data.Sender,
-                _currentUser!
-                ));
+            // Messages.Add(new TextMessageIncoming(
+            //     data.Content,
+            //     data.Sender,
+            //     _currentUser!
+            //     ));
+            Messages.Add(data);
         }
         else
         {
@@ -41,10 +43,20 @@ public class ChatBodyViewModel : ViewModelBase
     {
         if (data.Recipient == Recipient)
         {
-            Messages.Add(new TextMessageOutgoing(
-                data.Message,
-                data.Sender,
-                data.Recipient));
+            // Messages.Add(new TextMessageOutgoing(
+            //     data.Content,
+            //     data.Sender,
+            //     data.Recipient));
+            Messages.Add(data);
+        }
+    }
+
+    private void OnHistoryUpdated(List<MessageData> history)
+    {
+        Messages.Clear();
+        foreach (var message in history)
+        {
+            
         }
     }
     public void ChangeUserContext(LocalUid user)

@@ -21,7 +21,7 @@ public partial class ChatInputViewModel : ViewModelBase
     private void SendMessage()
     {
         if (string.IsNullOrWhiteSpace(InputText)) return;
-        var message = new MessageData(InputText, AppGlobalService.LocalUid, _userContext);
+        var message = new MessageData(AppGlobalService.LocalUid!, _userContext,  InputText);
         App.ServiceProvider.GetRequiredService<ChatService>().SendMessage(message);
         _inputText = string.Empty;
     }

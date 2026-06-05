@@ -20,5 +20,6 @@ public enum DaemonRequestType
     LoadServerList,
     LoadLocalUserList,
     LoadUserConversation,
-    MessageOutbound
+    MessageOutbound,
+    MessageInbound
 }

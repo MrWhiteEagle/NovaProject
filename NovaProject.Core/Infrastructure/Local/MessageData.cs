@@ -4,9 +4,6 @@ namespace NovaProject.Core.Infrastructure.Local;
 
 public struct MessageData
 {
-    [JsonPropertyName("Message")]
-    public string Message { get; init; }
-    
     [JsonPropertyName("Sender")]
     public LocalUid Sender { get; init; }
     
@@ -15,15 +12,47 @@ public struct MessageData
     
     [JsonPropertyName("Content")]
     public string Content { get; init; }
+    [JsonPropertyName("Timestamp")]
+    public DateTime Timestamp { get; init; }
+    [JsonPropertyName("Edited")]
+    public bool Edited { get; init; }
+    [JsonPropertyName("ContentType")]
+    public MessageContentType ContentType { get; init; }
+
+    [JsonPropertyName("Direction")]
+    public MessageDirection Direction { get; init; }
     
-    [JsonConstructor]
-    public MessageData(string message, LocalUid sender, LocalUid recipient, string content = "")
+    public MessageData(
+        LocalUid sender, 
+        LocalUid recipient, 
+        string content = "", 
+        DateTime? timestamp = null, 
+        bool edited = false,  
+        MessageContentType contentType = MessageContentType.Text, 
+        MessageDirection direction = MessageDirection.Outgoing)
     {
-        this.Message = message;
         this.Sender = sender;
         this.Recipient = recipient;
         this.Content = content;
+        this.Timestamp = timestamp ?? DateTime.UtcNow;
+        this.Edited = edited;
+        this.ContentType = contentType;
+        this.Direction = direction;
+    }
+
+    public enum MessageContentType
+    {
+        Text,
+        Image,
+        Video,
+        Audio,
+        Gif,
+        Link,
     }
     
-    
+    public enum MessageDirection
+    {
+        Incoming,
+        Outgoing
+    }
 }

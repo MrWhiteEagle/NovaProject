@@ -8,12 +8,18 @@ public class DaemonDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite("Data Source=nova.db");
+        string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        string dbpath = Path.Combine(baseDir, "nova.db");
+        optionsBuilder.UseSqlite($"Data Source={dbpath}");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<StoredMessage>()
-            .HasIndex(m => new { m.Relay, m.SenderName, m.SenderTag });
+            .HasIndex(m => m.To);
+        modelBuilder.Entity<StoredMessage>()
+            .HasIndex(m => m.From);
+        modelBuilder.Entity<StoredMessage>()
+            .HasIndex(m => m.TimeStamp);
     }
 }
