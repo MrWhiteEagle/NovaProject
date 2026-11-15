@@ -3,26 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:ccvm="using:NovaProject.Client.CustomControls.ViewModels"
-             xmlns:infrastructure="clr-namespace:NovaProject.Core.Infrastructure.Ui;assembly=NovaProject.Core"
              xmlns:chatElements="clr-namespace:NovaProject.Client.CustomControls.ChatElements"
-             xmlns:selectors="clr-namespace:NovaProject.Client.Selectors"
-             xmlns:local="clr-namespace:NovaProject.Core.Infrastructure.Local;assembly=NovaProject.Core"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBody"
              x:DataType="ccvm:ChatBodyViewModel">
-    <UserControl.Resources>
-        <DataTemplate x:Key="OutgoingBubble" x:DataType="local:MessageData">
-            <chatElements:ChatBubble MessageText="{Binding Content}" SentAt="{Binding Timestamp}"></chatElements:ChatBubble>
-        </DataTemplate>
-        <DataTemplate x:Key="IncomingBubble" x:DataType="local:MessageData">
-            <chatElements:ChatBubbleOther MessageText="{Binding Content}" SentAt="{Binding Timestamp}" ></chatElements:ChatBubbleOther>
-        </DataTemplate>
-        <selectors:MessageDataTemplateSelector
-            x:Key="BubbleSelector"
-            OutgoingTemplate="{StaticResource OutgoingBubble}"
-            IncomingTemplate="{StaticResource IncomingBubble}">
-        </selectors:MessageDataTemplateSelector>
-    </UserControl.Resources>
     <ScrollViewer
         x:Name="ChatScroll"
         Classes="ChatBody">
@@ -33,16 +17,13 @@
         <StackPanel
             x:Name="MessageList">
             <ItemsControl 
-                ItemsSource="{Binding Messages}"
-                ItemTemplate="{StaticResource BubbleSelector}">
-                <!-- <ItemsControl.DataTemplates> -->
-                <!--     <DataTemplate DataType="{x:Type infrastructure:TextMessageOutgoing}"> -->
-                <!--         <chatElements:ChatBubble MessageText="{Binding Text}" SentAt="{Binding Time}"/> -->
-                <!--     </DataTemplate> -->
-                <!--     <DataTemplate DataType="{x:Type infrastructure:TextMessageIncoming}"> -->
-                <!--         <chatElements:ChatBubbleOther MessageText="{Binding Text}" SentAt="{Binding Time}"/> -->
-                <!--     </DataTemplate> -->
-                <!-- </ItemsControl.DataTemplates> -->
+                ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <chatElements:ChatBubble
+                            MessageDataContext="{Binding .}"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
             </ItemsControl>
             <Panel Height="60"></Panel>
         </StackPanel>

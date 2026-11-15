@@ -1,12 +1,13 @@
 using Avalonia.Interactivity;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Data.Shared;
 
 namespace NovaProject.Client.Models.Events;
 
 public class OpenConversationEventArgs : RoutedEventArgs
 {
-    public User SelectedUserItem { get; set; }
+    public LocalUid SelectedUserItem { get; set; }
 
-    public OpenConversationEventArgs(RoutedEvent routedEvent, User selectedUserItem) :
+    public OpenConversationEventArgs(RoutedEvent routedEvent, LocalUid selectedUserItem) :
         base(routedEvent) => SelectedUserItem = selectedUserItem;
 }

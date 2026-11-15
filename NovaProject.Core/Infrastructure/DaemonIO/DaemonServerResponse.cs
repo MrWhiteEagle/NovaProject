@@ -1,4 +1,4 @@
-namespace NovaProject.Core.Infrastructure.Ui.Daemon;
+namespace NovaProject.Core.Infrastructure.DaemonIO;
 
 public class DaemonServerResponse
 {
@@ -15,8 +15,14 @@ public class DaemonServerResponse
 public enum DaemonResponseType
 {
     PingSuccess,
+    AuthFailed,
+    AuthSuccess,
+    VaultTamper,
+    RegisterFail,
+    RegisterSuccess,
     LoadUserList,
     LoadServerList,
     LoadUserConversation,
+    LoadUserConversationFail,
     MessageInbound
 }

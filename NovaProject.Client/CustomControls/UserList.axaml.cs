@@ -7,6 +7,7 @@ using NovaProject.Client.CustomControls.ViewModels;
 using NovaProject.Client.Models.Events;
 using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Data.Shared;
 
 namespace NovaProject.Client.CustomControls;
 
@@ -29,24 +30,19 @@ public partial class UserList : UserControl
     {
         if (sender is not Border b) return;
         b.Classes.Add("pressed");
-        
-        //Raise Routed Event for chat switch
-        if (b.DataContext is User u && this.DataContext is UserListViewModel)
+
+        if (this.DataContext is UserListViewModel vm)
         {
-            App.ServiceProvider.GetRequiredService<ChatService>().SwitchConversation(u);
-        }else if (b.DataContext is ServerData s && this.DataContext is UserListViewModel)
-        {
-            App.ServiceProvider.GetRequiredService<ChatService>().SwitchServer(s);
+            if (b.DataContext is LocalUid uid)
+            {
+                vm.LoadAndSwitchConversation(uid);
+            }
         }
-        
-        
     }
 
     private void UserTile_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (sender is Border b)
-        {
+        if (sender is not Border b) return;
             b.Classes.Remove("pressed");
-        }
     }
 }

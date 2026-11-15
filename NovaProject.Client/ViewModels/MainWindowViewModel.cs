@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reactive;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.CustomControls.ViewModels;
 using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Infrastructure.Local;
 using NovaProject.Core.Services;
 
@@ -14,92 +16,106 @@ namespace NovaProject.Client.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private NotificationService _notificationService;
-    private readonly string _debugId = Guid.NewGuid().ToString();
-    [ObservableProperty] private User _thisUser;
-
-    public MainWindowViewModel()
-    {
-        Console.WriteLine("New main window with id:" + _debugId);
-        _notificationService = new NotificationService();
-        AppGlobalService.SetCurrentUser(new User(
-            "mrwhiteeagle",
-            "MrWhiteEagle",
-            "2137"));
-        ThisUser = AppGlobalService.CurrentUser;
-        App.ServiceProvider.GetRequiredService<ChatService>().OnConversationSwitch += OpenConversationRequest;
-        App.ServiceProvider.GetRequiredService<ChatService>().OnCallOutbound += OpenOutboundCallRequest;
-        App.ServiceProvider.GetRequiredService<ChatService>().OnUserListUpdated += OnOnUserListUpdated;
-        App.ServiceProvider.GetRequiredService<ChatService>().OnServerListUpdated += OnOnUserListUpdated;
-
-        void OnOnUserListUpdated(List<UserListDisplayItem> obj)
-        {
-            this.WasUserListLoaded = true;
-        }
-    }
-
-    public ChatInputViewModel Input { get; set; } = new();
-    [ObservableProperty] private ChatBodyViewModel _body;
-    [ObservableProperty] private ChatTitlebarViewModel _titlebar;
+    private readonly NotificationService _notificationService;
+    private readonly ChatService _chatService;
     
-    //Server-Private Tabs
+    [ObservableProperty] private LocalUid _thisUser;
+    [ObservableProperty] private bool _isLoggedIn;
+
+    [ObservableProperty] private LoginWindowViewModel _loginWindow;
+    public ChatInputViewModel Input { get; set; }
+    [ObservableProperty] private ChatBodyViewModel? _body;
+    [ObservableProperty] private ChatTitlebarViewModel _titlebar = new();
+
+    
+    //Server-Private Conversation Tabs
     public ObservableCollection<UserListViewModel> Tabs { get; } = new();
     [ObservableProperty] private int _currentTabIndex;
     [ObservableProperty] private UserListViewModel _currentTab;
-
-    partial void OnCurrentTabIndexChanged(int value)
-    {
-        CurrentTab = value == 0 ? Tabs[0] : Tabs[1];
-    }
-    
     
     [ObservableProperty] private bool _isPaneOpen;
-    [ObservableProperty] private bool _isContextInitialized = false;
-    [ObservableProperty] private bool _wasUserListLoaded = false;
+    [ObservableProperty] private bool _isContextInitialized;
+    [ObservableProperty] private bool _wasUserListLoaded;
+    [ObservableProperty] private bool _wasServerListLoaded;
 
+    public MainWindowViewModel(NotificationService notificationService, ChatService chatService)
+    {
+        _notificationService = notificationService;
+        _chatService = chatService;
+        Input = new ChatInputViewModel(chatService);
+        LoginWindow = new LoginWindowViewModel(chatService);
+
+        if (_chatService.CurrentProfileId != null)
+        {
+            ThisUser = _chatService.CurrentProfileId;
+        }
+
+        _chatService.UserListUpdated += OnUserListUpdated;
+        _chatService.ServerListUpdated += OnServerListUpdated;
+        _chatService.AuthenticationSucceeded += OnAuthenticationSucceeded;
+        
+        SetupTabs();
+    }
+
+    private void OnUserListUpdated(object? sender, List<LocalUid> list)
+    {
+        WasUserListLoaded = true;
+    }
+    private void OnServerListUpdated(object? sender, List<ServerData> list)
+    {
+        WasServerListLoaded = true;
+    }
+    
+    partial void OnCurrentTabIndexChanged(int value)
+    {
+        if (value >= 0 && value < Tabs.Count)
+        {
+            CurrentTab = Tabs[value];
+        }
+    }
+
+    private void OnAuthenticationSucceeded(object? sender, LocalUid user)
+    {
+        Console.WriteLine("Authentication Succeeded, fetching data....");
+        IsLoggedIn = true;
+        ThisUser = _chatService.CurrentProfileId!;
+        SetupTabs();
+    }
+    
     [RelayCommand]
-    private void OpenPane()
+    private void TogglePane()
     {
         IsPaneOpen = !IsPaneOpen;
     }
 
     public void SetupTabs()
     {
-        Tabs.Add(new UserListViewModel("PersonRegular", UserListDataType.UserData));
-        Tabs.Add(new UserListViewModel("GlobeRegular",  UserListDataType.ServerData));
-        
+        Tabs.Clear();
+        Tabs.Add(new UserListViewModel(_chatService, "PersonRegular", UserListDataType.UserData));
+        Tabs.Add(new UserListViewModel(_chatService, "GlobeRegular",  UserListDataType.ServerData));
+        Tabs[0].ConversationSwitched += OpenConversationRequest;
+        Tabs[1].ConversationSwitched += OpenConversationRequest;
         CurrentTabIndex = 0;
         CurrentTab = Tabs[0];
     }
 
-    public void SetupInitialChatView()
-    {
-        Titlebar = new ChatTitlebarViewModel();
-    }
-
     private void OpenConversationRequest(LocalUid localUid)
     {
-        var chat = App.ServiceProvider.GetRequiredService<ChatService>().GetChatBodyForUser(localUid);
-        
-        //TODO: ADD DATA FETCH FOR BODY
-        
+        ChatBodyViewModel? chat = _chatService.LoadConversation(localUid);
         Body = chat;
-        if (chat.Recipient != null)
+        Titlebar.ChangeConversationContext(localUid);
+        Input.ChangeConversationContext(localUid);
+        IsContextInitialized = true;
+    }
+
+    public void Dispose()
+    {
+        _chatService.UserListUpdated -= OnUserListUpdated;
+        _chatService.ServerListUpdated -= OnServerListUpdated;
+
+        foreach (var tab in Tabs)
         {
-            Titlebar.ChangeUserContext(chat.Recipient);
-            Input.ChangeUserContext(chat.Recipient);
-            IsContextInitialized = true;
+            tab.Dispose();
         }
-    }
-
-    public void OpenOutboundCallRequest(LocalUid localUid)
-    {
-        Logger.LogInfo("[MainWindowVM] Got Outbound Call Request for user: " + localUid.UserName);
-    }
-
-    private void GetConversationData(UserListDisplayItem item)
-    {
-        //Implement data fetch
-        Logger.LogInfo("Fetching data for user: " + item.Name);
     }
 }

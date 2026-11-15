@@ -1,34 +1,38 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
 using NovaProject.Client.ViewModels;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Infrastructure.Local;
 using NovaProject.Core.Services;
+using NovaProject.CustomControls;
 
 namespace NovaProject.Client.CustomControls.ViewModels;
 
 public partial class ChatInputViewModel : ViewModelBase
 {
-    private LocalUid? _userContext;
+    private readonly ChatService _chatService;
+    private LocalUid? _conversationIdContext;
+    
+    [ObservableProperty]
     private string _inputText = string.Empty;
-    public string InputText
-    {
-        get => _inputText;
-        set => SetProperty(ref _inputText, value);
-    }
 
+    public ChatInputViewModel(ChatService chatService)
+    {
+        _chatService = chatService;
+    }
+    
     [RelayCommand]
     private void SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(InputText)) return;
-        var message = new MessageData(AppGlobalService.LocalUid!, _userContext,  InputText);
-        App.ServiceProvider.GetRequiredService<ChatService>().SendMessage(message);
-        _inputText = string.Empty;
+        if (string.IsNullOrWhiteSpace(InputText) || _conversationIdContext != null) return;
+        _chatService.SendMessage(_conversationIdContext!, InputText);
+        InputText = string.Empty;
     }
 
-    public void ChangeUserContext(LocalUid? userContext)
+    public void ChangeConversationContext(LocalUid conversationIdContext)
     {
-        Logger.LogInfo("Changing user context to " + userContext.UserName);
-        this._userContext = userContext;
+        this._conversationIdContext = conversationIdContext;
     }
 }

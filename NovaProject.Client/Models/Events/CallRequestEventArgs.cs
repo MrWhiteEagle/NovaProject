@@ -1,4 +1,5 @@
 using Avalonia.Interactivity;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Infrastructure.Local;
 
 namespace NovaProject.Client.Models.Events;

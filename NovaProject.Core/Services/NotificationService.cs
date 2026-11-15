@@ -24,12 +24,12 @@ public class NotificationService
         }
         catch
         {
-            Logger.LogError("Initialization Failed");
+            NovaLogger.LogError("Initialization Failed");
             throw new Exception("There was a problem initializing the notification service.");
         }
         finally
         {
-            Logger.LogInfo("The notification service has been initialized.");
+            NovaLogger.LogInfo("The notification service has been initialized.");
         }
     }
 
@@ -41,7 +41,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex.Message);
+            NovaLogger.LogError(ex.Message);
         }
     }
 
@@ -65,7 +65,7 @@ public class NotificationService
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex.Message);
+            NovaLogger.LogError(ex.Message);
         }
     }
 }

@@ -1,179 +1,380 @@
 using System.Collections.Concurrent;
 using System.IO.Pipes;
+using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading.Channels;
+using NovaProject.Core.Infrastructure.DaemonIO;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Infrastructure.Local;
-using NovaProject.Core.Infrastructure.Ui.Daemon;
 using NovaProject.Core.Services;
+using NovaProject.Daemon.Database;
+using NovaProject.Daemon.Services.Database;
+using NovaProject.Daemon.Services.Network;
 
 namespace NovaProject.Daemon.Services;
 
-public class DaemonWorker(DaemonDataService dataService) : BackgroundService
+public class DaemonWorker(UserProfileService profileService, UserVaultManager vaultManager, LocalVaultDataService vaultDataService) : BackgroundService
 {
-    private ConcurrentQueue<DaemonServerResponse> ResponseQueue { get; } = new();
-    private DaemonDataService _dataService { get; } = dataService;
+    private const string PipeName = "NovaApp_Pipe";
+    private readonly UserProfileService _profileService = profileService;
+    private readonly UserVaultManager _vaultManager = vaultManager;
+    private readonly LocalVaultDataService _vaultDataService = vaultDataService;
+
+    private ServerConnectionWorker? _serverWorker;
+    private readonly ECDsa _clientKey = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+    
+    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Logger.LogInfo("Daemon Worker waiting for handshake...");
-        //Main loop
+        NovaLogger.LogInfo("Daemon Worker Service Started.");
+        
+        // Initialize master Registry
+        await _profileService.InitializeAsync();
+        
+        
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 //Knock knock, UI
-                await using var pipeServer = new NamedPipeServerStream("NovaProject_Pipe", PipeDirection.InOut);
+                await using var pipeServer = new NamedPipeServerStream(
+                    PipeName, 
+                    PipeDirection.InOut,
+                    NamedPipeServerStream.MaxAllowedServerInstances,
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous);
+                
+                NovaLogger.LogInfo("Daemon waiting for client connection...");
                 await pipeServer.WaitForConnectionAsync(stoppingToken);
+                NovaLogger.LogInfo("Client connected.");
+                
+                var responseChannel = Channel.CreateUnbounded<DaemonServerResponse>(new UnboundedChannelOptions()
+                {
+                    SingleReader = true,
+                    SingleWriter = false
+                });
+                
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
                 using var reader = new StreamReader(pipeServer, leaveOpen: true);
                 using var writer = new StreamWriter(pipeServer, leaveOpen: true) { AutoFlush = true };
 
-                var readTask = Task.Run(async () =>
-                {
-                    while (!stoppingToken.IsCancellationRequested && pipeServer.IsConnected)
-                    {
-                        var line = await reader.ReadLineAsync();
-                        if (line == null) break;
-                        var data = JsonSerializer.Deserialize<DaemonServerRequest>(line);
-                        HandleRequest(data);
-                    }
-                });
-
-                var writeTask = Task.Run(async () =>
-                {
-                    while (!stoppingToken.IsCancellationRequested && pipeServer.IsConnected)
-                    {
-                        if (ResponseQueue.TryDequeue(out var response))
-                        {
-                            await writer.WriteLineAsync(JsonSerializer.Serialize(response));
-                            await writer.FlushAsync();
-                            await pipeServer.FlushAsync(stoppingToken);
-                            Logger.LogInfo("Daemon worker sent:  " + response.ResponseType);
-                        }
-                        else
-                        {
-                            await Task.Delay(100, stoppingToken);
-                        }
-                    }
-                });
+                var readTask = ProcessIncomingRequestsAsync(pipeServer, responseChannel, linkedCts.Token);
+                var writeTask = ProcessOutgoingResponseAsync(pipeServer, responseChannel, linkedCts.Token);
                 
+                await Task.WhenAny(readTask, writeTask);
+                await linkedCts.CancelAsync();
                 await Task.WhenAll(readTask, writeTask);
-                await pipeServer.FlushAsync(cancellationToken: stoppingToken);
-                Logger.LogInfo("Daemon connection closed");
-                pipeServer.Disconnect();
+                
+                NovaLogger.LogInfo("Daemon connection closed");
+                if (pipeServer.IsConnected)
+                {
+                    pipeServer.Disconnect();
+                }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                Logger.LogInfo("Daemon worker stopped, cancelling operations...");
+                NovaLogger.LogInfo("Daemon worker stopped, cancelling operations...");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Logger.LogError(e.ToString());
+                NovaLogger.LogError($"Error in daemon pipe loop: {ex.Message}");
                 //Rapid fire prevention
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(2000, stoppingToken);
             }
         }
     }
 
-    private void HandleRequest(DaemonServerRequest? request)
+    private async Task ProcessIncomingRequestsAsync(
+        Stream pipeStream,
+        ChannelWriter<DaemonServerResponse> responseWriter,
+        CancellationToken ct)
     {
-        if (request == null)
+        using var reader = new StreamReader(pipeStream, leaveOpen: true);
+        while (!ct.IsCancellationRequested)
         {
-            Logger.LogError("Request is null");
-        }
-        else
-        {
-            Logger.LogInfo("Daemon Responding to " + request.RequestType);
-            switch (request.RequestType)
+            var line = await reader.ReadLineAsync(ct);
+            if(line == null) break; //Disconnected (EOF)
+
+            try
             {
-                case DaemonRequestType.LoadServerList:
-                    RespondToServerListRequest();
-                    break;
-                case DaemonRequestType.LoadLocalUserList:
-                    RespondToUserListRequest();
-                    break;
-                case DaemonRequestType.MessageOutbound:
-                    RespondToPrivateMessageOutgoing(request);
-                    break;
-                case DaemonRequestType.MessageInbound:
-                    break;
-                case DaemonRequestType.LoadUserConversation:
-                    //Needs to be Task.Run in order to run it asynchronously without needing the whole HandleBlock to be
-                    Task.Run(() => HandleLoadingUserConversation(request));
-                    break;
-                case DaemonRequestType.Ping:
-                    RespondToPingRequest();
-                    break;
-                    
+                var request = JsonSerializer.Deserialize<DaemonServerRequest>(line, JsonOptions);
+                if (request == null)
+                {
+                    NovaLogger.LogError("Deserialized Daemon Request was null.");
+                    continue;
+                }
+
+                await HandleRequestAsync(request, responseWriter, ct);
+            }
+            catch (Exception ex)
+            {
+                NovaLogger.LogError($"Failed to parse or process request: {ex.Message}");
             }
         }
     }
 
-    #region Response Methods
-    private void RespondToPingRequest()
+    private async Task ProcessOutgoingResponseAsync(
+        Stream pipeStream,
+        ChannelReader<DaemonServerResponse> responseReader,
+        CancellationToken ct)
     {
-        var response = new DaemonServerResponse(DaemonResponseType.PingSuccess, DateTime.Now.ToString("HH:mm:ss"));
-        ResponseQueue.Enqueue(response);
+        using var writer = new StreamWriter(pipeStream, leaveOpen: true) {AutoFlush = true};
+
+        while (await responseReader.WaitToReadAsync(ct))
+        {
+            while (responseReader.TryRead(out var response))
+            {
+                var json = JsonSerializer.Serialize(response, JsonOptions);
+                await writer.WriteLineAsync(json.AsMemory(), ct);
+                NovaLogger.LogInfo($"Daemon sent: {response.ResponseType}");
+            }
+        }
     }
 
-    private void RespondToServerListRequest()
+    private async Task HandleRequestAsync(
+        DaemonServerRequest request,
+        ChannelWriter<DaemonServerResponse> responseWriter,
+        CancellationToken ct)
     {
-        var response = new DaemonServerResponse(DaemonResponseType.LoadServerList,
-            JsonSerializer.Serialize(PlaceHolderData.PlaceHolderServerData));
-        ResponseQueue.Enqueue(response);
+        NovaLogger.LogInfo("Daemon Responding to " + request.RequestType);
+        switch (request.RequestType)
+        {
+            case DaemonRequestType.Ping: 
+                await responseWriter.WriteAsync(new DaemonServerResponse(
+                    DaemonResponseType.PingSuccess, 
+                    DateTime.Now.ToString("HH:mm:ss")), ct);
+                break;
+            
+            case DaemonRequestType.LoginUser:
+                await HandleLoginUserAsync(request, responseWriter, ct);
+                break;
+            
+            case DaemonRequestType.RegisterUser:
+                await HandleRegisterUserAsync(request, responseWriter, ct);
+                break;
+            
+            case DaemonRequestType.LockVault:
+                break;
+            
+            case DaemonRequestType.LoadServerList:
+                await responseWriter.WriteAsync(new DaemonServerResponse(
+                    DaemonResponseType.LoadServerList,
+                    JsonSerializer.Serialize(PlaceHolderData.PlaceHolderServerData, JsonOptions)), ct);
+                break;
+            
+            case DaemonRequestType.LoadLocalUserList: 
+                await responseWriter.WriteAsync(new DaemonServerResponse(
+                    DaemonResponseType.LoadUserList,
+                    JsonSerializer.Serialize(PlaceHolderData.PlaceholderUserData, JsonOptions)), ct);
+                break;
+            
+            case DaemonRequestType.MessageOutbound: 
+                await HandlePrivateMessageOutgoingAsync(request, responseWriter, ct); 
+                break;
+            
+            case DaemonRequestType.MessageInbound:
+                await HandlePrivateMessageIncomingAsync(request, responseWriter, ct);
+                break;
+            
+            case DaemonRequestType.LoadUserConversation: 
+                await HandleLoadingUserConversationAsync(request, responseWriter, ct); 
+                break;
+            
+            default:
+                NovaLogger.LogInfo($"Unhandled request type: {request.RequestType}");
+                break;
+            }
     }
 
-    private void RespondToUserListRequest()
-    {
-        var response = new DaemonServerResponse(DaemonResponseType.LoadUserList,
-            JsonSerializer.Serialize(PlaceHolderData.PlaceholderUserData));
-        ResponseQueue.Enqueue(response);
-    }
+    #region Handlers
 
-    private void RespondToPrivateMessageOutgoing(DaemonServerRequest request)
+    private async Task HandleLoginUserAsync(DaemonServerRequest request,
+        ChannelWriter<DaemonServerResponse> responseWriter, CancellationToken ct)
     {
-        ForwardMessageToRelay(request);
-        //DEBUG PART - REBOUND MESSAGE BACK TO UI
         try
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var payload = JsonSerializer.Deserialize<MessageData>(request.Payload, options);
-            Task.Run(() => _dataService.SaveMessage(payload));
-            //TODO: implement a notification for the UI that the message was sent correctly to relay and the relay received it
-            if (payload.Sender == null || payload.Recipient == null)
+            var credentials = JsonSerializer.Deserialize<ProfileCredentialsDto>(request.Payload, JsonOptions);
+            if (credentials == null || string.IsNullOrWhiteSpace(credentials.Username) ||
+                string.IsNullOrWhiteSpace(credentials.Password))
             {
-                Logger.LogError("CRITICAL: MessageData deserialized but Sender/Recipient are NULL!");
-                Logger.LogInfo($"Check the JSON keys in this payload: {request.Payload}");
+                await responseWriter.WriteAsync(new DaemonServerResponse(DaemonResponseType.AuthFailed,
+                    "Username and password are required"), ct);
                 return;
             }
-            var newMessage = new MessageData(payload.Recipient, payload.Sender, "REBOUND MESSAGE: " + payload.Content, direction: MessageData.MessageDirection.Incoming);
-            Logger.LogInfo($"Rebounding message from {newMessage.Sender.UserName ?? "Unknown"} to {newMessage.Recipient.UserName ?? "Unknown"}");
-            var newPayload = JsonSerializer.Serialize(newMessage);
-            var rebounce = new DaemonServerResponse(DaemonResponseType.MessageInbound, newPayload);
-            ResponseQueue.Enqueue(rebounce);
+
+            var result = await _profileService.UnlockProfileAsync(credentials.Username, credentials.Password);
+
+            switch (result.Status)
+            {
+                case ProfileAccessStatus.Success:
+                    await responseWriter.WriteAsync(new DaemonServerResponse(DaemonResponseType.AuthSuccess,
+                        result.LUid!.ToString()), ct);
+                    await ConnectToRelayServerAsync(credentials.Username, responseWriter, ct);
+                    break;
+                case ProfileAccessStatus.IntegrityCheckFail:
+                    NovaLogger.LogCritical($"Vault integrity check failed for {credentials.Username}!");
+                    await responseWriter.WriteAsync(
+                        new DaemonServerResponse(DaemonResponseType.VaultTamper,
+                            "Vault Integrity Check Failed. Potential disk corruption or tampering."), ct);
+                    break;
+                case ProfileAccessStatus.InvalidPassword:
+                case ProfileAccessStatus.NotFound:
+                default:
+                    NovaLogger.LogInfo($"Login attempt failed for {credentials.Username}!");
+                    await responseWriter.WriteAsync(
+                        new DaemonServerResponse(DaemonResponseType.AuthFailed,
+                            $"Invalid credentials for {credentials.Username}!"), ct);
+                    break;
+            }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Logger.LogError("Daemon failed to process Outgoing message " + e.Message);   
+            NovaLogger.LogError($"Login failed: {ex.Message}");
+            await responseWriter.WriteAsync(new DaemonServerResponse(DaemonResponseType.AuthFailed, "An error occured during authentication!"), ct);
         }
     }
 
-    private void RespondToPrivateMessageIncoming(DaemonServerRequest request)
+    public async Task HandleRegisterUserAsync(DaemonServerRequest request, ChannelWriter<DaemonServerResponse> responseWriter,
+        CancellationToken ct)
     {
-        //TODO: Implement once the server project is ready
+        try
+        {
+            var credentials = JsonSerializer.Deserialize<ProfileCredentialsDto>(request.Payload, JsonOptions);
+            if (credentials == null || string.IsNullOrWhiteSpace(credentials.Username) ||
+                string.IsNullOrWhiteSpace(credentials.Password))
+            {
+                await responseWriter.WriteAsync(
+                    new DaemonServerResponse(DaemonResponseType.RegisterFail, "Username and password are required"),
+                    ct);
+                return;
+            }
+
+            var result = await _profileService.RegisterUserAsync(credentials.Username, credentials.Password);
+
+            if (result.Status == ProfileAccessStatus.Success)
+            {
+                await responseWriter.WriteAsync(
+                    new DaemonServerResponse(DaemonResponseType.RegisterSuccess, result.Pid!), ct);
+            }
+            else
+            {
+                await responseWriter.WriteAsync(
+                    new DaemonServerResponse(DaemonResponseType.RegisterFail, "User already exists!"), ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            NovaLogger.LogError($"Registration failed: {ex.Message}");
+            await responseWriter.WriteAsync(new DaemonServerResponse(DaemonResponseType.RegisterFail, $"An error occured during registration: {ex.Message}"), ct);
+        }
+    }
+    
+    private async Task HandlePrivateMessageOutgoingAsync(
+        DaemonServerRequest request, 
+        ChannelWriter<DaemonServerResponse> responseWriter, 
+        CancellationToken ct)
+    {
+        try
+        {
+            var payload = JsonSerializer.Deserialize<MessageData>(request.Payload, JsonOptions);
+            
+            //TODO: Implement DB persistence
+
+            if (_serverWorker is { IsAuthenticated: true })
+            {
+                NovaLogger.LogInfo($"FORWARDING MESSAGE TO RELAY -> {payload.ConversationId}");
+                await _serverWorker.SendPrivateMessageAsync(payload, ct);
+            }
+        }
+        catch (Exception ex)
+        {
+            NovaLogger.LogError($"Daemon failed to process outgoing message {ex.Message}");   
+        }
+    }
+
+    private async Task HandlePrivateMessageIncomingAsync(
+        DaemonServerRequest request, 
+        ChannelWriter<DaemonServerResponse> responseWriter, 
+        CancellationToken ct)
+    {
         
-        // var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        // var payload = JsonSerializer.Deserialize<MessageData>(request.Payload, options);
     }
 
-    private async Task HandleLoadingUserConversation(DaemonServerRequest? request)
+    private async Task HandleLoadingUserConversationAsync(
+        DaemonServerRequest request,
+        ChannelWriter<DaemonServerResponse> responseWriter,
+        CancellationToken ct)
     {
-        var dbResult = await _dataService.GetMessageHistory(request.Payload);
-        var response = new DaemonServerResponse(DaemonResponseType.LoadUserConversation, JsonSerializer.Serialize(dbResult));
-        ResponseQueue.Enqueue(response);
+        try
+        {
+            var lUid = JsonSerializer.Deserialize<LocalUid>(request.Payload);
+            if (lUid == null) return;
+        
+            string conversationId = lUid.ToString();
+            
+            NovaLogger.LogInfo($"Getting User conversation: {conversationId}");
+        
+            var dbResult = await _vaultDataService.GetMessagesAsync(conversationId, AppGlobalService.MessageHistoryLimit);
+        
+            var conversation = dbResult.Select(
+                    m => new MessageData
+                    {
+                        ConversationId = m.ConversationId,
+                        IsOutbound = m.IsOutbound,
+                        Content = m.Content,
+                        Timestamp = m.TimeStamp
+                    })
+                .ToList();
+
+            await responseWriter.WriteAsync(
+                new DaemonServerResponse(
+                    DaemonResponseType.LoadUserConversation,
+                    JsonSerializer.Serialize(conversation, JsonOptions)), ct);
+        }
+        catch (Exception ex)
+        {
+            NovaLogger.LogError($"Failed to load conversation: {ex.Message}");
+            await responseWriter.WriteAsync(
+                new DaemonServerResponse(DaemonResponseType.LoadUserConversationFail, ex.Message), ct);
+        }
     }
 
-    private void ForwardMessageToRelay(DaemonServerRequest request)
+    private async Task ConnectToRelayServerAsync(string username, ChannelWriter<DaemonServerResponse> responseWriter, CancellationToken ct)
     {
-        Logger.LogCritical("SENDING PRIVATE MESSAGE TO RELAY SERVER");
+        try
+        {
+            if (_serverWorker != null)
+            {
+                await _serverWorker.DisposeAsync();
+            }
+
+            _serverWorker = new ServerConnectionWorker("localhost:5050", username, _clientKey);
+            _serverWorker.MessageReceived += async (msg) =>
+            {
+                try
+                {
+                    await responseWriter.WriteAsync(
+                        new DaemonServerResponse(
+                            DaemonResponseType.MessageInbound,
+                            JsonSerializer.Serialize(msg, JsonOptions)), ct);
+
+                }
+                catch (Exception ex)
+                {
+                    NovaLogger.LogError($"Failed to receive message: {ex.Message}");
+                }
+            };
+
+            await _serverWorker.ConnectAndRunAsync(ct);
+            NovaLogger.LogInfo($"Connecting to Relay Server as {_serverWorker.FullLocalUid}");
+
+        }
+        catch (Exception ex)
+        {
+            NovaLogger.LogError($"Failed to connect to relay server: {ex.Message}");
+        }
     }
     #endregion
 }

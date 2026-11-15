@@ -6,6 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:NovaProject.Client.ViewModels"
         xmlns:customControls="clr-namespace:NovaProject.Client.CustomControls"
+        xmlns:views="clr-namespace:NovaProject.Client.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="NovaProject.Client.Views.MainWindow"
         x:DataType="viewModels:MainWindowViewModel"
@@ -13,6 +14,9 @@
         Title="NovaProject.Client"
         Background="#111111">
     <Grid>
+        <views:LoginWindow 
+            DataContext="{Binding LoginWindow}"/>
+        <Grid IsVisible="{Binding IsLoggedIn}">
         <ProgressBar 
             IsVisible="{Binding !WasUserListLoaded}" 
             VerticalAlignment="Center" 
@@ -20,7 +24,7 @@
             ZIndex="10" 
             IsIndeterminate="True"
             Foreground="{StaticResource Primary}"
-            ></ProgressBar>
+            />
         <SplitView
             DisplayMode="CompactInline"
             IsVisible="{Binding WasUserListLoaded}"
@@ -50,7 +54,7 @@
                     </TabStrip>
                     <Button
                         Grid.Column="1"
-                        Command="{Binding OpenPaneCommand}"
+                        Command="{Binding TogglePaneCommand}"
                         Classes="PaneOpenButton"
                         Classes.expanded="{Binding IsPaneOpen}">
                         <PathIcon
@@ -101,7 +105,7 @@
                         <TextBlock
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            Text="{Binding ThisUser.DisplayName}">
+                            Text="{Binding ThisUser.UserName}">
                         </TextBlock>
                     </Grid>
                 </Border>
@@ -159,6 +163,7 @@
         </SplitView.Content>
     </SplitView>
         
+    </Grid>
     </Grid>
 
 </Window>

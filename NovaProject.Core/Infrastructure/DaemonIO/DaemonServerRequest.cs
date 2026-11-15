@@ -1,15 +1,13 @@
-namespace NovaProject.Core.Infrastructure.Ui.Daemon;
+namespace NovaProject.Core.Infrastructure.DaemonIO;
 
 public class DaemonServerRequest
 {
     public DaemonRequestType RequestType { get; }
-    public string RelayServer { get; }
     public string Payload { get; }
 
-    public DaemonServerRequest(DaemonRequestType requestType = DaemonRequestType.Ping, string relayServer = "", string payload = "")
+    public DaemonServerRequest(DaemonRequestType requestType = DaemonRequestType.Ping, string payload = "")
     {
         RequestType = requestType;
-        RelayServer = relayServer;
         Payload = payload;
     }
 }
@@ -17,6 +15,9 @@ public class DaemonServerRequest
 public enum DaemonRequestType
 {
     Ping,
+    LoginUser,
+    RegisterUser,
+    LockVault,
     LoadServerList,
     LoadLocalUserList,
     LoadUserConversation,

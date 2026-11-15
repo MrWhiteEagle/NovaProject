@@ -2,59 +2,56 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Infrastructure.Local;
 
 namespace NovaProject.Client.CustomControls.ChatElements;
 
 public partial class ChatBubble : UserControl
 {
-    public static readonly StyledProperty<string> MessageTextProperty = 
-        AvaloniaProperty.Register<ChatBubble, string>(nameof(MessageText));
-    public static readonly StyledProperty<DateTime> SentAtProperty =
-        AvaloniaProperty.Register<ChatBubble, DateTime>(nameof(SentAt));
-    public static readonly StyledProperty<MessageData.MessageDirection> MessageDirectionProperty =
-        AvaloniaProperty.Register<ChatBubble, MessageData.MessageDirection>(nameof(MessageDirection));
+    public static readonly StyledProperty<MessageData> MessageDataContextProperty = 
+        AvaloniaProperty.Register<ChatBubble, MessageData>(nameof(MessageDataContext));
+    public static readonly StyledProperty<bool> AreActionsVisibleProperty =
+        AvaloniaProperty.Register<ChatBubble, bool>(nameof(AreActionsVisible));
+    public static readonly StyledProperty<LocalUid> SenderContextProperty =
+        AvaloniaProperty.Register<ChatBubble, LocalUid>(nameof(SenderContext));
     public ChatBubble()
     {
         InitializeComponent();
+        AreActionsVisible = false;
+    }
+    
+    public MessageData MessageDataContext
+    {
+        get => GetValue(MessageDataContextProperty);
+        set => SetValue(MessageDataContextProperty, value);
     }
 
-    public string MessageText
+    public bool AreActionsVisible
     {
-        get => GetValue(MessageTextProperty);
-        set => SetValue(MessageTextProperty, value);
-    }
-    public DateTime SentAt
-    {
-        get => GetValue(SentAtProperty);
-        set => SetValue(SentAtProperty, value);
+        get => GetValue(AreActionsVisibleProperty);
+        set => SetValue(AreActionsVisibleProperty, value);
     }
 
-    public MessageData.MessageDirection MessageDirection
+    public LocalUid SenderContext
     {
-        get => GetValue(MessageDirectionProperty);
-        set => SetValue(MessageDirectionProperty, value);
+        get => GetValue(SenderContextProperty);
+        set => SetValue(SenderContextProperty, value);
     }
+    
 
     public bool IsIncoming
     {
-        get => MessageDirection == MessageData.MessageDirection.Incoming ?  true : false;
+        get => !MessageDataContext.IsOutbound;
     }
     private void InputElement_OnPointerEntered(object? sender, PointerEventArgs e)
     {
-        EditMessageButton.IsVisible = true;
-        RespondToMessageButton.IsVisible = true;
-        DeleteMessageButton.IsVisible = true;
-        MoreMessageActionsButton.IsVisible = true;
-        TimeReceivedText.IsVisible = true;
+        if(!IsIncoming)
+            AreActionsVisible = true;
     }
 
     private void InputElement_OnPointerExited(object? sender, PointerEventArgs e)
     {
-        EditMessageButton.IsVisible = false;
-        RespondToMessageButton.IsVisible = false;
-        DeleteMessageButton.IsVisible = false;
-        MoreMessageActionsButton.IsVisible = false;
-        TimeReceivedText.IsVisible = false;
+        AreActionsVisible = false;
     }
 }

@@ -1,125 +1,199 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
+using Avalonia.Threading;
 using NovaProject.Client.CustomControls.ViewModels;
 using NovaProject.Core.Infrastructure;
-using NovaProject.Core.Infrastructure.Local;
-using NovaProject.Core.Infrastructure.Ui.Daemon;
+using NovaProject.Core.Infrastructure.DaemonIO;
+using NovaProject.Core.Infrastructure.Data.Shared;
 using NovaProject.Core.Services;
 
 namespace NovaProject.Client.Services;
 
 public class ChatService
 {
-    private readonly DaemonBridgeService _daemon;
+    private readonly DaemonBridgeService _bridge;
     private readonly Dictionary<LocalUid, ChatBodyViewModel> _loadedChats = new();
-    public event Action<List<UserListDisplayItem>>? OnUserListUpdated;
-    public event Action<List<UserListDisplayItem>>? OnServerListUpdated;
-    public event Action<List<MessageData>>? OnUserConversationLoaded;
-    public event Action<MessageData>? OnMessageReceived;
-    public event Action<MessageData>? OnMessageSent;
-    public event Action<LocalUid>? OnConversationSwitch;
-    public event Action<LocalUid>? OnCallOutbound;
+    private ChatBodyViewModel? _currentChat;
+    public ObservableCollection<LocalUid> LocalUserList { get; } = new();
+    public ObservableCollection<ServerData> ServerList { get; } = new();
 
-    public ChatService(DaemonBridgeService daemon)
-    {
-        _daemon = daemon;
-        Logger.LogInfo("ChatService initialized");
-    }
-
-    public void LoadSavedServersRequest()
-    {
-        var request = new DaemonServerRequest(DaemonRequestType.LoadServerList);
-        _daemon.SendRequest(request);
-    }
+    public event EventHandler<MessageData>? MessageReceived;
+    public event EventHandler<List<MessageData>>? ConversationLoaded;
+    public event EventHandler<LocalUid>? AuthenticationSucceeded;
+    public event EventHandler<string>? AuthenticationFailed;
+    public event EventHandler<string>? RegisterFailed;
+    public event EventHandler? RegisterSucceeded;
+    public event EventHandler<string>? VaultTampered;
+    public event EventHandler<List<ServerData>>? ServerListUpdated;
+    public event EventHandler<List<LocalUid>>? UserListUpdated;
     
-    public void LoadUserListRequest()
+    public bool IsAuthenticated { get; private set; }
+    public LocalUid? CurrentProfileId { get; private set; }
+
+    public ChatService(DaemonBridgeService bridge)
     {
-        var request = new DaemonServerRequest(DaemonRequestType.LoadLocalUserList);
-        _daemon.SendRequest(request);
+        _bridge = bridge;
+
+        _bridge.AuthenticationSuccess += OnBridgeAuthenticationSucceeded;
+        _bridge.AuthenticationFailure += OnBridgeAuthenticationFailed;
+        _bridge.RegistrationSuccess += OnBridgeRegisterSucceeded;
+        _bridge.RegistrationFailure += OnBridgeRegisterFailed;
+        _bridge.VaultTamperDetected += OnBridgeVaultTampered;
+        _bridge.ConnectionStateChanged += OnBridgeConnectionStateChanged;
+        _bridge.MessageReceived += OnBridgeMessageReceived;
+        _bridge.ConversationReceived  += OnBridgeConversationLoaded;
+        _bridge.UserListReceived += OnBridgeUserListReceived;
+        _bridge.ServerListReceived += OnBridgeServerListReceived;
+        
+        NovaLogger.LogInfo("ChatService initialized");
     }
 
-    public void LoadUserConversationRequest(LocalUid target)
+    #region Event Chaining
+    private void OnBridgeAuthenticationSucceeded(object? sender, string rawProfile)
     {
-        var request = new DaemonServerRequest(DaemonRequestType.LoadUserConversation, "localhost", target.ToString());
-        _daemon.SendRequest(request);
+        LocalUid currentProfile = LocalUid.Parse(rawProfile);
+        Dispatcher.UIThread.Post(() =>
+        {
+            CurrentProfileId = currentProfile;
+            IsAuthenticated = true;
+            
+            AuthenticationSucceeded?.Invoke(this, currentProfile);
+        });
     }
 
-    public void LoadUserConversation(List<MessageData>? messages)
+    private void OnBridgeAuthenticationFailed(object? sender, string reason)
     {
-        OnUserConversationLoaded?.Invoke(messages);
-        Logger.LogInfo("Loading UserConversation from daemon");
+        Dispatcher.UIThread.Post(() =>
+        {
+            IsAuthenticated = false;
+            AuthenticationFailed?.Invoke(this, reason);
+        });
     }
+
+    private void OnBridgeRegisterFailed(object? sender, string reason)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            RegisterFailed?.Invoke(this, reason);
+        });
+    }
+
+    private void OnBridgeRegisterSucceeded(object? sender, EventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            RegisterSucceeded?.Invoke(this, EventArgs.Empty);
+        });
+    }
+
+    private void OnBridgeVaultTampered(object? sender, string details)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            VaultTampered?.Invoke(this, details);
+        });
+    }
+
+    private void OnBridgeConnectionStateChanged(object? sender, bool isConnected)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!isConnected)
+            {
+                IsAuthenticated = false;
+            }
+        });
+    }
+
+    private void OnBridgeMessageReceived(object? sender, MessageData message)
+    {
+        var conversationContext = LocalUid.Parse(message.ConversationId);
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (_loadedChats.TryGetValue(conversationContext, out var chat))
+            {
+                chat.Messages.Add(message);
+                //TODO: IMPLEMENT CHATBODY UNREAD COUNT
+            }
+        });
+    }
+
+    private void OnBridgeConversationLoaded(object? sender, List<MessageData> messages)
+    {
+        Dispatcher.UIThread.Post(() => 
+        { 
+            ConversationLoaded?.Invoke(this, messages);
+        });
+    }
+
+    private void OnBridgeUserListReceived(object? sender, List<LocalUid> userList)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            LocalUserList.Clear();
+            foreach (var user in userList)
+            {
+                LocalUserList.Add(user);
+            }
+            UserListUpdated?.Invoke(this, userList);
+        });
+    }
+
+    private void OnBridgeServerListReceived(object? sender, List<ServerData> serverList)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ServerList.Clear();
+            foreach (var server in serverList)
+            {
+                ServerList.Add(server);
+            }
+            ServerListUpdated?.Invoke(this, serverList);
+        });
+    }
+    #endregion
     
-    public void UpdateServerList(List<ServerData>? serverList)
-    {
-        var newServerList = serverList.Cast<UserListDisplayItem>().ToList();
-        OnServerListUpdated?.Invoke(newServerList);
-        Logger.LogInfo("Got ServerList from daemon");
-    }
-    public void UpdateUserList(List<User>? userList)
-    {
-        var newUserList = userList.Cast<UserListDisplayItem>().ToList();
-        OnUserListUpdated?.Invoke(newUserList);
-        Logger.LogInfo("Got UserList from daemon");
-    }
-    public void SendMessage(MessageData data)
-    {
-        OnMessageSent?.Invoke(data);
-        _daemon.SendRequest(new DaemonServerRequest(DaemonRequestType.MessageOutbound, "", JsonSerializer.Serialize(data)));
-    }
-    public void ReceiveMessage(DaemonServerResponse response)
-    {
-        var data = JsonSerializer.Deserialize<MessageData>(response.Payload);
-        OnMessageReceived?.Invoke(data);
-    }
-
-    public void SwitchConversation(LocalUid localUid)
-    {
-        Logger.LogInfo($"Switching conversation to {localUid.UserName}");
-        OnConversationSwitch?.Invoke(localUid);
-    }
-
-    public void SwitchConversation(User user) => SwitchConversation(ComposeLocalUserId(user));
-
-    public void SwitchServer(ServerData? server)
-    {
-        Logger.LogInfo($"Switching server to {server?.Name}");
-    }
-
-    public void RequestOutboundCall(LocalUid localUid)
-    {
-        Logger.LogInfo($"Requesting outbound call to {localUid.UserName}");
-        OnCallOutbound?.Invoke(localUid);
-    }
-
-    public static LocalUid ComposeLocalUserId(User? user)
-    {
-        return user != null ? new LocalUid(user.Name, user.DisplayName, user.Tag, user.RelayAddress) : new LocalUid("null", "null", "null",  "null");
-    }
-
-    private static User ExtractDataFromLocalId(LocalUid localUid)
-    {
-        return new User(localUid.Name, localUid.UserName, localUid.Tag, localUid.RelayAddress ?? "");
-    }
-    
-    public ChatBodyViewModel GetChatBodyForUser(LocalUid localUid)
+    #region UI Commands
+    public void Login(string username, string password) => _bridge.Login(username, password);
+    public void Register(string username, string password) => _bridge.Register(username, password);
+    public void RefreshLocalUsers() => _bridge.RequestUserList();
+    public void RefreshServerList() => _bridge.RequestServerList();
+    public ChatBodyViewModel LoadConversation(LocalUid localUid)
     {
         if (_loadedChats.TryGetValue(localUid, out var chat))
         {
             return chat;
         }
-        _daemon.GetUserConversation(ExtractDataFromLocalId(localUid));
-        var newChat = new ChatBodyViewModel();
-        newChat.ChangeUserContext(localUid);
-        RegisterChat(newChat, newChat.Recipient!);
+        _bridge.LoadConversation(localUid);
+        var newChat = new ChatBodyViewModel(localUid, this);
+        RegisterChat(newChat, localUid);
         return newChat;
     }
+    public void SendMessage(LocalUid conversationContext, string text)
+    {
+        if (!IsAuthenticated || CurrentProfileId == null)
+        {
+            NovaLogger.LogError($"User {CurrentProfileId} is not authenticated");
+            return;
+        }
+
+        var messageData = new MessageData
+        {
+            Content = text,
+            ConversationId = conversationContext.ToString(),
+            IsOutbound = true,
+        };
+        
+        _bridge.SendMessage(messageData);
+    }
+    
+    #endregion
+    
     private void RegisterChat(ChatBodyViewModel chatBody, LocalUid userId)
     {
         _loadedChats.Add(userId, chatBody);
     }
-
-    public ChatBodyViewModel GetChatBodyForUser(User user) => GetChatBodyForUser(ComposeLocalUserId(user));
 }

@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace NovaProject.Core.Services;
 
-public static class Logger
+public static class NovaLogger
 {
     private static List<string> _logs = new();
     public static void LogInfo(string msg,

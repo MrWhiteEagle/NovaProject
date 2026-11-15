@@ -1,62 +1,81 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Avalonia.Logging;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using NovaProject.Client.Services;
 using NovaProject.Client.ViewModels;
 using NovaProject.Core.Infrastructure;
+using NovaProject.Core.Infrastructure.Data.Shared;
+using NovaProject.Core.Services;
 
 namespace NovaProject.Client.CustomControls.ViewModels;
 
 public partial class UserListViewModel : ViewModelBase
 {
+    private readonly ChatService _chatService;
+    private UserListDataType _dataType;
     public string TabIconName { get; set; }
+    public ObservableCollection<UserListDisplayItem> DisplayItemList { get; } = [];
 
-    public UserListViewModel(string tabIconName, UserListDataType dataType)
+    public event Action<LocalUid>? ConversationSwitched;
+    
+
+    public UserListViewModel(ChatService chatService, string tabIconName, UserListDataType dataType)
     {
-        this.TabIconName = tabIconName;
-        switch (dataType)
+        _chatService = chatService;
+        _dataType = dataType;
+        TabIconName = tabIconName;
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        switch (_dataType)
         {
             case UserListDataType.ServerData:
-                App.ServiceProvider.GetRequiredService<ChatService>().OnServerListUpdated += UpdateData;
-                App.ServiceProvider.GetRequiredService<ChatService>().LoadSavedServersRequest();
+                _chatService.ServerListUpdated += OnServerListUpdated;
+                _chatService.RefreshServerList();
                 break;
             case UserListDataType.UserData:
-                App.ServiceProvider.GetRequiredService<ChatService>().OnUserListUpdated += UpdateData;
-                App.ServiceProvider.GetRequiredService<ChatService>().LoadUserListRequest();
+                _chatService.UserListUpdated += OnUserListUpdated;
+                _chatService.RefreshLocalUsers();
                 break;
         }
     }
-    public ObservableCollection<UserListDisplayItem> DisplayItemList { get; } = [];
-    //TODO: Refactor to use Local structs instead classes, user class should be reserved for daemon and server only
     
-    public void AddDataToList(UserListDisplayItem item)
+    private void OnServerListUpdated(object? sender, List<ServerData>? data)
     {
-        Dispatcher.UIThread.Post(() =>
+        if(data == null) return;
+        DisplayItemList.Clear();
+        foreach (var item in data)
         {
             DisplayItemList.Add(item);
-        });
+        }
+    }
+    
+    private void OnUserListUpdated(object? sender, List<LocalUid>? data)
+    {
+        if (data == null) return;
+        DisplayItemList.Clear();
+        foreach (var item in data)
+        {
+            DisplayItemList.Add(item.ToDisplayItem());
+        }
     }
 
-    public void RemoveDataFromList(UserListDisplayItem item)
+    [RelayCommand]
+    public void LoadAndSwitchConversation(LocalUid luid)
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            DisplayItemList.Remove(item);
-        });
+        ConversationSwitched?.Invoke(luid);
     }
 
-    private void UpdateData(List<UserListDisplayItem> data)
+    public void Dispose()
     {
-        Dispatcher.UIThread.Post(() =>
-        {
-            DisplayItemList.Clear();
-            foreach (var item in data)
-            {
-                DisplayItemList.Add(item);
-            }
-        });
+        _chatService.ServerListUpdated -= OnServerListUpdated;
+        _chatService.UserListUpdated -= OnUserListUpdated;
     }
 }
 
