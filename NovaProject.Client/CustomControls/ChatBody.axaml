@@ -2,30 +2,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:ccvm="using:NovaProject.Client.CustomControls.ViewModels"
+             xmlns:vm="using:NovaProject.Client.CustomControls.ViewModels"
              xmlns:chatElements="clr-namespace:NovaProject.Client.CustomControls.ChatElements"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="NovaProject.CustomControls.ChatBody"
-             x:DataType="ccvm:ChatBodyViewModel">
-    <ScrollViewer
-        x:Name="ChatScroll"
-        Classes="ChatBody">
-        <Interaction.Behaviors>
-            <!--<ia:VerticalScrollViewerAnimatedBehavior>
-            </ia:VerticalScrollViewerAnimatedBehavior>-->
-        </Interaction.Behaviors>
-        <StackPanel
-            x:Name="MessageList">
-            <ItemsControl 
-                ItemsSource="{Binding Messages}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <chatElements:ChatBubble
-                            MessageDataContext="{Binding .}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-            <Panel Height="60"></Panel>
-        </StackPanel>
-    </ScrollViewer>
+             x:DataType="vm:ChatBodyViewModel">
+    <Grid>
+        <Panel Background="Black" IsVisible="{Binding !IsConversationLoaded}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <ProgressBar IsIndeterminate="True" Foreground="{DynamicResource Primary}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Panel>
+        <ScrollViewer
+            x:Name="ChatScroll"
+            Classes="ChatBody"
+            IsVisible="{Binding IsConversationLoaded}">
+            <Interaction.Behaviors>
+                <!--<ia:VerticalScrollViewerAnimatedBehavior>
+                </ia:VerticalScrollViewerAnimatedBehavior>-->
+            </Interaction.Behaviors>
+            <StackPanel
+                x:Name="MessageList">
+                <ItemsControl 
+                            ItemsSource="{Binding Messages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <chatElements:ChatBubble
+                                        MessageDataContext="{Binding .}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Panel Height="60"></Panel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

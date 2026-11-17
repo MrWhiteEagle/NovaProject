@@ -31,13 +31,13 @@ public record LocalUid(
                 name += array[i];
                 i++;
             }
-
+            i++;
             while (array[i] != '@')
             {
                 tag += array[i];
                 i++;
             }
-
+            i++;
             while (array[i] != ';')
             {
                 relayAddress += array[i];

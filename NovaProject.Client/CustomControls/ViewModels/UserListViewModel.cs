@@ -69,6 +69,7 @@ public partial class UserListViewModel : ViewModelBase
     [RelayCommand]
     public void LoadAndSwitchConversation(LocalUid luid)
     {
+        NovaLogger.LogInfo("Switch conversation to " + luid);
         ConversationSwitched?.Invoke(luid);
     }
 

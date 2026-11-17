@@ -1,3 +1,5 @@
+using System;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +16,8 @@ public partial class ChatInputViewModel : ViewModelBase
 {
     private readonly ChatService _chatService;
     private LocalUid? _conversationIdContext;
+
+    public event Action<MessageData>? MessageSent;
     
     [ObservableProperty]
     private string _inputText = string.Empty;
@@ -26,9 +30,21 @@ public partial class ChatInputViewModel : ViewModelBase
     [RelayCommand]
     private void SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(InputText) || _conversationIdContext != null) return;
-        _chatService.SendMessage(_conversationIdContext!, InputText);
-        InputText = string.Empty;
+        if (string.IsNullOrWhiteSpace(InputText) || _conversationIdContext == null) return;
+
+        var message = new MessageData()
+        {
+            Content = InputText,
+            ConversationId = _conversationIdContext.ToString(),
+            IsOutbound = true
+        };
+        
+        _chatService.SendMessage(message);
+        
+        Dispatcher.UIThread.Post(() =>
+        {
+            InputText = string.Empty;
+        });
     }
 
     public void ChangeConversationContext(LocalUid conversationIdContext)

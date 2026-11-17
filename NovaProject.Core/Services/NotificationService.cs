@@ -1,15 +1,8 @@
-using DesktopNotifications;
-using DesktopNotifications.FreeDesktop;
-using DesktopNotifications.Windows;
-using INotificationManager = DesktopNotifications.INotificationManager;
 
 namespace NovaProject.Core.Services;
 
 public class NotificationService
 {
-    private INotificationManager _notificationManager = OperatingSystem.IsLinux() 
-        ? new FreeDesktopNotificationManager() 
-        : new WindowsNotificationManager();
 
     public NotificationService()
     {
@@ -20,7 +13,6 @@ public class NotificationService
     {
         try
         {
-            await _notificationManager.Initialize();
         }
         catch
         {
@@ -33,11 +25,11 @@ public class NotificationService
         }
     }
 
-    public async void ShowNotification(Notification notification)
+    public async void ShowNotification()
     {
         try
         {
-            await _notificationManager.ShowNotification(notification, DateTimeOffset.Now.AddSeconds(AppGlobalService.MessageNotificationTime));
+           
         }
         catch (Exception ex)
         {
@@ -47,20 +39,10 @@ public class NotificationService
 
     public async void ShowNotification(string title, string message)
     {
-        var notification = new Notification
-        {
-            Title = title,
-            Body = message,
-        };
+        
         try
         {
-            await _notificationManager.ShowNotification(
-                new Notification
-            {
-                Title = title,
-                Body = message,
-            }, 
-                expirationTime: DateTimeOffset.Now.AddSeconds(AppGlobalService.MessageNotificationTime));
+            
 
         }
         catch (Exception ex)

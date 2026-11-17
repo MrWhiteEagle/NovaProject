@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using NovaProject.Core.Infrastructure.Data.Shared;
 
 namespace NovaProject.Core.Infrastructure;
 
@@ -7,12 +8,23 @@ public class UserListDisplayItem : INotifyPropertyChanged
 {
     public UserListDisplayItem(string name, string displayName, string tag, string relayAddress = "")
     {
+        UidContext = new LocalUid(name, displayName, tag, relayAddress);
         _name = name;
         _displayName = displayName;
         _tag = tag;
         _relayAddress = relayAddress;
     }
 
+    public UserListDisplayItem(LocalUid localUid)
+    {
+        UidContext = localUid;
+        _name = localUid.Name;
+        _displayName = localUid.UserName;
+        _tag = localUid.Tag;
+        _relayAddress = localUid.RelayAddress;
+    }
+
+    public LocalUid UidContext;
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

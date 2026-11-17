@@ -20,7 +20,6 @@ public class ChatService
     public ObservableCollection<LocalUid> LocalUserList { get; } = new();
     public ObservableCollection<ServerData> ServerList { get; } = new();
 
-    public event EventHandler<MessageData>? MessageReceived;
     public event EventHandler<List<MessageData>>? ConversationLoaded;
     public event EventHandler<LocalUid>? AuthenticationSucceeded;
     public event EventHandler<string>? AuthenticationFailed;
@@ -111,21 +110,35 @@ public class ChatService
     private void OnBridgeMessageReceived(object? sender, MessageData message)
     {
         var conversationContext = LocalUid.Parse(message.ConversationId);
+        NovaLogger.LogInfo($"Received message {message.Content} from {message.ConversationId}");
         Dispatcher.UIThread.Post(() =>
         {
             if (_loadedChats.TryGetValue(conversationContext, out var chat))
             {
                 chat.Messages.Add(message);
+                NovaLogger.LogInfo($"Chat {conversationContext} now has {chat.Messages.Count} messages");
                 //TODO: IMPLEMENT CHATBODY UNREAD COUNT
+            }
+            else
+            {
+                NovaLogger.LogError($"Conversation {conversationContext} not found");
             }
         });
     }
 
     private void OnBridgeConversationLoaded(object? sender, List<MessageData> messages)
     {
+        var uid = LocalUid.Parse(messages[0].ConversationId);
         Dispatcher.UIThread.Post(() => 
-        { 
-            ConversationLoaded?.Invoke(this, messages);
+        {
+            if (_loadedChats.TryGetValue(uid, out var chat))
+            {
+                chat.UpdateChatHistory(messages);
+            }
+            else
+            {
+                NovaLogger.LogError($"Received chat history for an unrequested and unloaded conversation with id {uid}");
+            }
         });
     }
 
@@ -165,29 +178,25 @@ public class ChatService
     {
         if (_loadedChats.TryGetValue(localUid, out var chat))
         {
+            NovaLogger.LogInfo("Returned existing chat body");
             return chat;
         }
         _bridge.LoadConversation(localUid);
-        var newChat = new ChatBodyViewModel(localUid, this);
-        RegisterChat(newChat, localUid);
-        return newChat;
+        NovaLogger.LogInfo($"Loading conversation {localUid}");
+        return new ChatBodyViewModel(localUid, this);
     }
-    public void SendMessage(LocalUid conversationContext, string text)
+    public void SendMessage(MessageData msg)
     {
         if (!IsAuthenticated || CurrentProfileId == null)
         {
             NovaLogger.LogError($"User {CurrentProfileId} is not authenticated");
             return;
         }
-
-        var messageData = new MessageData
-        {
-            Content = text,
-            ConversationId = conversationContext.ToString(),
-            IsOutbound = true,
-        };
         
-        _bridge.SendMessage(messageData);
+        OnBridgeMessageReceived(this, msg);
+        NovaLogger.LogInfo($"Sending message {msg.Content} to  {msg.ConversationId} ");
+        
+        _bridge.SendMessage(msg);
     }
     
     #endregion

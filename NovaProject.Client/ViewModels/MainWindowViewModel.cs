@@ -101,7 +101,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private void OpenConversationRequest(LocalUid localUid)
     {
-        ChatBodyViewModel? chat = _chatService.LoadConversation(localUid);
+        ChatBodyViewModel chat = _chatService.LoadConversation(localUid);
         Body = chat;
         Titlebar.ChangeConversationContext(localUid);
         Input.ChangeConversationContext(localUid);
@@ -112,6 +112,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         _chatService.UserListUpdated -= OnUserListUpdated;
         _chatService.ServerListUpdated -= OnServerListUpdated;
+        _chatService.AuthenticationSucceeded -= OnAuthenticationSucceeded;
 
         foreach (var tab in Tabs)
         {

@@ -112,9 +112,9 @@
             </Grid>
         </SplitView.Pane>
         <SplitView.Content>
-            <Border
-                CornerRadius="10,0,0,10"
-                Background="{DynamicResource ChatBodyBackgroundGradient}"
+                <Border
+                    CornerRadius="10,0,0,10"
+                    Background="{DynamicResource ChatBodyBackgroundGradient}"
                 >
                 <Grid>
                     <Panel
@@ -157,7 +157,7 @@
                         ZIndex="1"
                         DataContext="{Binding Input}">
                     </cc:ChatInput>
-                </Grid>
+                    </Grid>
                 </Grid>
             </Border>
         </SplitView.Content>

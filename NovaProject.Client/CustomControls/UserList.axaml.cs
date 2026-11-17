@@ -8,6 +8,7 @@ using NovaProject.Client.Models.Events;
 using NovaProject.Client.Services;
 using NovaProject.Core.Infrastructure;
 using NovaProject.Core.Infrastructure.Data.Shared;
+using NovaProject.Core.Services;
 
 namespace NovaProject.Client.CustomControls;
 
@@ -30,12 +31,13 @@ public partial class UserList : UserControl
     {
         if (sender is not Border b) return;
         b.Classes.Add("pressed");
+        NovaLogger.LogInfo("Switch conversation");
 
         if (this.DataContext is UserListViewModel vm)
         {
-            if (b.DataContext is LocalUid uid)
+            if (b.DataContext is UserListDisplayItem uldi)
             {
-                vm.LoadAndSwitchConversation(uid);
+                vm.LoadAndSwitchConversation(uldi.UidContext);
             }
         }
     }
